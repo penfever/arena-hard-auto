@@ -93,6 +93,61 @@ def make_config(config_file: str) -> dict:
 
     return config_kwargs
 
+import re
+
+def remove_special_tokens(messages):
+    # List of special tokens to remove
+    special_tokens = [
+        r'<\|im_start\|>', r'<\|im_end\|>',  # ChatML tokens
+        r'<s>', r'</s>', r'<\|eot_id\|>',     # LLaMA tokens
+        r'<\|endoftext\|>',                  # GPT special token
+    ]
+
+    new_messages = []
+    
+    # Combine all special tokens into a single regex pattern
+    pattern = '|'.join(special_tokens)
+    
+    for m in messages:
+
+
+        # Remove all instances of special tokens from the prompt
+        m['content'] = re.sub(pattern, '', m['content'])
+    
+        # Remove any extra whitespace that might have been left behind
+        m['content'] = ' '.join(m['content'].split())
+        new_messages.append(m)
+    
+    return new_messages
+
+def remove_duplicate_char_ngrams(messages, n):
+    new_messages = []
+    for m in messages:
+        # Generate character n-grams
+        text = m['content']
+        ngrams = [text[i:i+n] for i in range(len(text)-n+1)]
+        
+        # Keep track of seen n-grams
+        seen = set()
+        result = []
+        
+        for i, ngram in enumerate(ngrams):
+            if ngram not in seen:
+                # This is a new n-gram, add it to the result
+                result.append(text[i])
+                seen.add(ngram)
+            else:
+                # This is a duplicate n-gram, skip it
+                pass
+        
+        # Add any remaining characters
+        result.extend(text[len(text)-n+1:])
+        
+        # Join the characters back into a string
+        s = ''.join(result)
+        m['content'] = s
+        new_messages.append(m)
+    return new_messages
 
 def chat_completion_openai(model, messages, temperature, max_tokens, api_dict=None):
     import openai
@@ -103,7 +158,6 @@ def chat_completion_openai(model, messages, temperature, max_tokens, api_dict=No
         )
     else:
         client = openai.OpenAI()
-    
     output = API_ERROR_OUTPUT
     for _ in range(API_MAX_RETRY):
         try:
@@ -120,7 +174,12 @@ def chat_completion_openai(model, messages, temperature, max_tokens, api_dict=No
             time.sleep(API_RETRY_SLEEP)
         except openai.BadRequestError as e:
             print(messages)
-            print(type(e), e)
+            print(type(e), e, dir(e))
+            #NOTE: this has the potential to produce some pretty weird strings; should be careful here
+            # if e.error['code'] == 'invalid_prompt':
+            messages = remove_special_tokens(messages)
+            messages = remove_duplicate_char_ngrams(messages, 50)
+
         except KeyError:
             print(type(e), e)
             break

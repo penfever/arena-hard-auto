@@ -118,7 +118,7 @@ def get_battles_from_judgment(judge_name, first_game_only=False, WEIGHT=3, basel
     
     print("Turning judgment results into battles...")
 
-    directory = f"data/arena-hard-v0.1/model_judgment/{judge_name}"
+    directory = f"data/arena-hard-v0.1/model_judgment/{judge_name}_judge/{baseline_model}_base"
     assert os.path.exists(directory)
     for file in tqdm(glob(f"{directory}/*jsonl")):
         df = pd.read_json(file, lines=True)
@@ -273,4 +273,4 @@ if __name__ == "__main__":
         col_list[-2], col_list[-1] = col_list[-1], col_list[-2]
         stats = stats.loc[:,col_list]
         stats['date'] = date_str[:4] + '-' + date_str[4:6] + '-' + date_str[6:]
-        stats.to_csv(f"leaderboard/arena_hard_leaderboard_{date_str}.csv", index=False)
+        stats.to_csv(f"leaderboard/arena_hard_leaderboard_{date_str}_{args.judge_name}_judge_{args.baseline}_base.csv", index=False)

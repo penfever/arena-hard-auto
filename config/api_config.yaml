@@ -14,6 +14,12 @@ gpt-3.5-turbo-0125:
     api_type: openai
     parallel: 8
 
+gpt-4o-mini-2024-07-18:
+    model_name: gpt-4o-mini-2024-07-18
+    endpoints: null
+    api_type: openai
+    parallel: 8
+
 gpt-4-0314:
     model_name: gpt-4-0314
     endpoints: null
@@ -24,6 +30,12 @@ gpt-4-1106-preview:
     model_name: gpt-4-1106-preview
     endpoints: null
     api_type: openai
+    parallel: 8
+
+claude-3-5-sonnet-20240620:
+    model_name: claude-3-5-sonnet-20240620
+    endpoints: null
+    api_type: anthropic
     parallel: 8
 
 facebook/opt-125m:

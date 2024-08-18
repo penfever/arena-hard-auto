@@ -156,7 +156,10 @@ if __name__ == "__main__":
         ref_answers = [ref_answers[model] for model in configs["ref_model"]]
     
     output_files = {}
-    output_dir = f"data/{configs['bench_name']}/model_judgment/{configs['judge_model']}"
+    if configs["baseline_model"]:
+        output_dir = f"data/{configs['bench_name']}/model_judgment/{configs['judge_model']}_judge/{configs['baseline_model']}_base"
+    else:
+        output_dir = f"data/{configs['bench_name']}/model_judgment/{configs['judge_model']}"
     for model in models:
         output_files[model] = os.path.join(
             output_dir,
