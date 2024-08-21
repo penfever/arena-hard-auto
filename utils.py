@@ -258,6 +258,18 @@ def chat_completion_anthropic(model, messages, temperature, max_tokens, api_dict
             time.sleep(API_RETRY_SLEEP)
     return output
 
+def chat_completion_huggingface(model, conv, temperature, max_tokens):
+    API_BASE = "https://api-inference.huggingface.co/models/"
+    API_URL = API_BASE + model
+    headers = {"Authorization": "Bearer " + str(os.environ["HUGGINGFACE_API_KEY"])}
+    query = {
+        "inputs": conv,
+    }
+    output = requests.post(API_URL, headers=headers, json=query)
+    output = output.json()
+    print(output)
+    breakpoint()
+    return 
 
 def chat_completion_mistral(model, messages, temperature, max_tokens):
     from mistralai.client import MistralClient
@@ -392,3 +404,42 @@ def reorg_answer_file(answer_file):
     with open(answer_file, "w") as fout:
         for qid in qids:
             fout.write(answers[qid])
+
+import json
+import re
+
+def write_with_subscores(input_file, output_file):
+    with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
+        for line in infile:
+            data = json.loads(line)
+            
+            for game in data['games']:
+                judgment = game['judgment']
+                
+                # Define regex patterns
+                patterns = {
+                    'correctness_score': r'Correctness: \(\(([AB<>=]+)\)\)',
+                    'completeness_score': r'Completeness: \(\(([AB<>=]+)\)\)',
+                    'safety_score': r'Safety: \(\(([AB<>=]+)\)\)',
+                    'conciseness_score': r'Conciseness: \(\(([AB<>=]+)\)\)',
+                    'style_score': r'Style: \(\(([AB<>=]+)\)\)'
+                }
+                
+                # Extract scores using regex
+                for key, pattern in patterns.items():
+                    match = re.search(pattern, judgment)
+                    game[key] = match.group(1) if match else ''
+                
+                # Ranking Logic
+                game['score_final'] = game['style_score']
+                # Reorder the dictionary to insert new keys after 'score'
+                keys = list(game.keys())
+                score_index = keys.index('score')
+                new_keys = keys[:score_index+1] + list(patterns.keys()) + keys[score_index+1:]
+                new_keys = [k for k in new_keys if k not in patterns]
+                
+                game = {k: game[k] for k in new_keys}
+            
+            # Write the modified data to the output file
+            json.dump(data, outfile)
+            outfile.write('\n')

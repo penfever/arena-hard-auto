@@ -8,6 +8,12 @@
 #     tokenizer: str optional (to optimize token limits)
 #     parallel: int
 
+Meta-Llama-3.1-405B:
+    model_name: meta-llama/Meta-Llama-3.1-405B
+    endpoints: null
+    api_type: huggingface
+    parallel: 8
+
 gpt-3.5-turbo-0125:
     model_name: gpt-3.5-turbo-0125
     endpoints: null
@@ -16,6 +22,12 @@ gpt-3.5-turbo-0125:
 
 gpt-4o-mini-2024-07-18:
     model_name: gpt-4o-mini-2024-07-18
+    endpoints: null
+    api_type: openai
+    parallel: 8
+
+gpt-4-turbo-2024-04-09:
+    model_name: gpt-4-turbo-2024-04-09
     endpoints: null
     api_type: openai
     parallel: 8

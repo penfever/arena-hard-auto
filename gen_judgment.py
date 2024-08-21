@@ -12,6 +12,7 @@ from utils import (
     chat_completion_openai,
     chat_completion_openai_azure,
     chat_completion_anthropic,
+    chat_completion_huggingface,
     load_questions,
     load_model_answers,
     get_endpoint,
@@ -40,6 +41,8 @@ def get_answer(model, conv, temperature, max_tokens, endpoint_dict=None):
         output = chat_completion_anthropic(model, conv, temperature, max_tokens)
     elif endpoint_dict["api_type"] == "azure":
         output = chat_completion_openai_azure(model, conv, temperature, max_tokens, api_dict)
+    elif endpoint_dict["api_type"] == "huggingface":
+        output = chat_completion_huggingface(model, conv, temperature, max_tokens)
     else:
         output = chat_completion_openai(model, conv, temperature, max_tokens, api_dict)
     return output

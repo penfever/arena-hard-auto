@@ -7,4 +7,5 @@ num_choices: 1
 
 
 model_list:
-  - meta-llama/Meta-Llama-3-8B-Instruct
+  - gpt-4-turbo-2024-04-09
+  - gpt-4o-mini-2024-07-18
