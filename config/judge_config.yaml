@@ -3,7 +3,7 @@ name: judgment config file for Arena Hard
 bench_name: arena-hard-v0.1
 
 # Arena Hard default
-judge_model: QwQ-32B
+judge_model: DeepSeek-R1
 reference: False # Optional
 ref_model: null  
 
@@ -53,3 +53,5 @@ prompt_template: ["<|User Prompt|>\n{question_1}\n\n<|The Start of Assistant A's
 
 # r1 curation experiment: use sample responses from some of the models that are not in our test set, but are in the repository,
 model_list:
+  - dolphin-2.9-llama3-8b
+  - gpt-4o-mini-2024-07-18
