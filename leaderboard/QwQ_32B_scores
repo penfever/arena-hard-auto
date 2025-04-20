@@ -1,0 +1,119 @@
+(arena-hard-auto)  ✘ moonshine@MacBook-Pro  ~/workspace/arena-hard-auto   chiungyit/tryit ●  python show_result.py --output --judge-name QwQ-32B --baseline gpt-4-0314 --judgment-dir /Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed --target-metric "score_final"
+Namespace(bench_name='arena-hard-v0.1', judge_name='QwQ-32B', baseline='gpt-4-0314', load_battles=False, load_bootstrap=False, show_elo=False, weight=3, num_rounds=100, output=True, first_game_only=False, answer_dir='', judgment_dir='/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed', target_metric='score_final')
+Turning judgment results into battles...
+100%|██████████████████████████████████████████████████████████████████████████████████| 12/12 [00:02<00:00,  4.61it/s]
+bootstrap: 100%|█████████████████████████████████████████████████████████████████████| 100/100 [00:03<00:00, 28.57it/s]
+Magpie-Align/Llama-3-8B-Magpie-Align-v0.2 | score: 59.6  | 95% CI: (-3.2, 3.4)  | average #tokens: 0
+gpt-4-0314                     | score: 50.0  | 95% CI:  (0.0, 0.0)  | average #tokens: 423
+gpt-4-0613                     | score: 40.6  | 95% CI: (-2.1, 2.3)  | average #tokens: 354
+meta-llama/Meta-Llama-3-8B-Instruct | score: 37.9  | 95% CI: (-2.4, 2.9)  | average #tokens: 0
+gpt-3.5-turbo-0125             | score: 37.0  | 95% CI: (-1.9, 2.2)  | average #tokens: 329
+Magpie-Align/Llama-3-8B-Magpie-Align-SFT-v0.2 | score: 34.8  | 95% CI: (-2.5, 3.3)  | average #tokens: 0
+allenai/llama-3-tulu-2-dpo-8b  | score: 21.0  | 95% CI: (-1.8, 2.6)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-WildChat | score: 15.5  | 95% CI: (-2.0, 1.6)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-Tulu-330K | score: 12.8  | 95% CI: (-1.9, 1.7)  | average #tokens: 0
+jondurbin/bagel-8b-v1.0        | score:  6.3  | 95% CI: (-1.2, 1.3)  | average #tokens: 0
+meta-llama/Meta-Llama-3-8B     | score:  1.6  | 95% CI: (-0.5, 0.6)  | average #tokens: 0
+facebook/opt-125m              | score:  1.2  | 95% CI: (-0.4, 0.4)  | average #tokens: 0
+(arena-hard-auto)  moonshine@MacBook-Pro  ~/workspace/arena-hard-auto   chiungyit/tryit ●  python show_result.py --output --judge-name QwQ-32B --baseline gpt-4-0314 --judgment-dir /Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed --target-metric "correctness_score"
+Namespace(bench_name='arena-hard-v0.1', judge_name='QwQ-32B', baseline='gpt-4-0314', load_battles=False, load_bootstrap=False, show_elo=False, weight=3, num_rounds=100, output=True, first_game_only=False, answer_dir='', judgment_dir='/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed', target_metric='correctness_score')
+Turning judgment results into battles...
+100%|██████████████████████████████████████████████████████████████████████████████████| 12/12 [00:02<00:00,  4.02it/s]
+bootstrap: 100%|█████████████████████████████████████████████████████████████████████| 100/100 [00:03<00:00, 25.18it/s]
+gpt-4-0314                     | score: 50.0  | 95% CI:  (0.0, 0.0)  | average #tokens: 423
+gpt-4-0613                     | score: 41.1  | 95% CI: (-1.7, 2.0)  | average #tokens: 354
+Magpie-Align/Llama-3-8B-Magpie-Align-v0.2 | score: 34.3  | 95% CI: (-2.0, 2.2)  | average #tokens: 0
+gpt-3.5-turbo-0125             | score: 30.1  | 95% CI: (-2.1, 2.0)  | average #tokens: 329
+Magpie-Align/Llama-3-8B-Magpie-Align-SFT-v0.2 | score: 19.2  | 95% CI: (-1.6, 1.7)  | average #tokens: 0
+meta-llama/Meta-Llama-3-8B-Instruct | score: 19.2  | 95% CI: (-1.6, 1.5)  | average #tokens: 0
+allenai/llama-3-tulu-2-dpo-8b  | score: 13.3  | 95% CI: (-1.1, 1.2)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-WildChat | score: 11.6  | 95% CI: (-1.1, 1.4)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-Tulu-330K | score: 10.6  | 95% CI: (-1.2, 1.5)  | average #tokens: 0
+jondurbin/bagel-8b-v1.0        | score:  7.2  | 95% CI: (-1.0, 0.9)  | average #tokens: 0
+meta-llama/Meta-Llama-3-8B     | score:  1.7  | 95% CI: (-0.4, 0.5)  | average #tokens: 0
+facebook/opt-125m              | score:  1.0  | 95% CI: (-0.4, 0.4)  | average #tokens: 0
+(arena-hard-auto)  moonshine@MacBook-Pro  ~/workspace/arena-hard-auto   chiungyit/tryit ●  python show_result.py --output --judge-name QwQ-32B --baseline gpt-4-0314 --judgment-dir /Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed --target-metric "completeness_score"
+Namespace(bench_name='arena-hard-v0.1', judge_name='QwQ-32B', baseline='gpt-4-0314', load_battles=False, load_bootstrap=False, show_elo=False, weight=3, num_rounds=100, output=True, first_game_only=False, answer_dir='', judgment_dir='/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed', target_metric='completeness_score')
+Turning judgment results into battles...
+100%|██████████████████████████████████████████████████████████████████████████████████| 12/12 [00:02<00:00,  4.22it/s]
+bootstrap: 100%|█████████████████████████████████████████████████████████████████████| 100/100 [00:03<00:00, 25.12it/s]
+Magpie-Align/Llama-3-8B-Magpie-Align-v0.2 | score: 61.4  | 95% CI: (-3.0, 2.2)  | average #tokens: 0
+gpt-4-0314                     | score: 50.0  | 95% CI:  (0.0, 0.0)  | average #tokens: 423
+meta-llama/Meta-Llama-3-8B-Instruct | score: 38.0  | 95% CI: (-2.5, 2.7)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-Magpie-Align-SFT-v0.2 | score: 33.6  | 95% CI: (-2.1, 2.7)  | average #tokens: 0
+gpt-4-0613                     | score: 31.2  | 95% CI: (-2.9, 2.4)  | average #tokens: 354
+allenai/llama-3-tulu-2-dpo-8b  | score: 22.6  | 95% CI: (-2.1, 2.4)  | average #tokens: 0
+gpt-3.5-turbo-0125             | score: 21.9  | 95% CI: (-2.2, 2.0)  | average #tokens: 329
+Magpie-Align/Llama-3-8B-WildChat | score:  9.7  | 95% CI: (-1.6, 1.5)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-Tulu-330K | score:  8.0  | 95% CI: (-0.9, 1.4)  | average #tokens: 0
+jondurbin/bagel-8b-v1.0        | score:  5.2  | 95% CI: (-1.1, 1.1)  | average #tokens: 0
+meta-llama/Meta-Llama-3-8B     | score:  0.9  | 95% CI: (-0.3, 0.4)  | average #tokens: 0
+facebook/opt-125m              | score:  0.3  | 95% CI: (-0.2, 0.2)  | average #tokens: 0
+(arena-hard-auto)  moonshine@MacBook-Pro  ~/workspace/arena-hard-auto   chiungyit/tryit ●  python show_result.py --output --judge-name QwQ-32B --baseline gpt-4-0314 --judgment-dir /Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed --target-metric "safety_score"      
+Namespace(bench_name='arena-hard-v0.1', judge_name='QwQ-32B', baseline='gpt-4-0314', load_battles=False, load_bootstrap=False, show_elo=False, weight=3, num_rounds=100, output=True, first_game_only=False, answer_dir='', judgment_dir='/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed', target_metric='safety_score')
+Turning judgment results into battles...
+100%|██████████████████████████████████████████████████████████████████████████████████| 12/12 [00:02<00:00,  4.69it/s]
+bootstrap: 100%|█████████████████████████████████████████████████████████████████████| 100/100 [00:01<00:00, 51.50it/s]
+Magpie-Align/Llama-3-8B-Magpie-Align-v0.2 | score: 50.3  | 95% CI: (-0.8, 0.9)  | average #tokens: 0
+gpt-4-0613                     | score: 50.2  | 95% CI: (-0.7, 0.7)  | average #tokens: 354
+gpt-4-0314                     | score: 50.0  | 95% CI:  (0.0, 0.0)  | average #tokens: 423
+gpt-3.5-turbo-0125             | score: 48.9  | 95% CI: (-0.7, 0.5)  | average #tokens: 329
+Magpie-Align/Llama-3-8B-Magpie-Align-SFT-v0.2 | score: 47.3  | 95% CI: (-1.2, 0.7)  | average #tokens: 0
+meta-llama/Meta-Llama-3-8B-Instruct | score: 47.2  | 95% CI: (-0.8, 0.9)  | average #tokens: 0
+allenai/llama-3-tulu-2-dpo-8b  | score: 47.0  | 95% CI: (-0.9, 0.9)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-WildChat | score: 46.6  | 95% CI: (-0.9, 0.9)  | average #tokens: 0
+jondurbin/bagel-8b-v1.0        | score: 46.5  | 95% CI: (-0.8, 0.8)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-Tulu-330K | score: 45.7  | 95% CI: (-1.2, 0.8)  | average #tokens: 0
+facebook/opt-125m              | score: 42.8  | 95% CI: (-1.3, 1.2)  | average #tokens: 0
+meta-llama/Meta-Llama-3-8B     | score: 42.6  | 95% CI: (-1.2, 1.4)  | average #tokens: 0
+(arena-hard-auto)  moonshine@MacBook-Pro  ~/workspace/arena-hard-auto   chiungyit/tryit ●  python show_result.py --output --judge-name QwQ-32B --baseline gpt-4-0314 --judgment-dir /Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed --target-metric "conciseness_score"
+Namespace(bench_name='arena-hard-v0.1', judge_name='QwQ-32B', baseline='gpt-4-0314', load_battles=False, load_bootstrap=False, show_elo=False, weight=3, num_rounds=100, output=True, first_game_only=False, answer_dir='', judgment_dir='/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed', target_metric='conciseness_score')
+Turning judgment results into battles...
+100%|██████████████████████████████████████████████████████████████████████████████████| 12/12 [00:02<00:00,  4.14it/s]
+bootstrap: 100%|█████████████████████████████████████████████████████████████████████| 100/100 [00:03<00:00, 32.73it/s]
+gpt-3.5-turbo-0125             | score: 59.1  | 95% CI: (-3.0, 2.6)  | average #tokens: 329
+gpt-4-0613                     | score: 58.1  | 95% CI: (-2.2, 2.5)  | average #tokens: 354
+gpt-4-0314                     | score: 50.0  | 95% CI:  (0.0, 0.0)  | average #tokens: 423
+Magpie-Align/Llama-3-8B-WildChat | score: 42.5  | 95% CI: (-2.0, 2.0)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-Tulu-330K | score: 41.4  | 95% CI: (-2.4, 2.6)  | average #tokens: 0
+jondurbin/bagel-8b-v1.0        | score: 35.2  | 95% CI: (-2.1, 2.3)  | average #tokens: 0
+meta-llama/Meta-Llama-3-8B-Instruct | score: 24.1  | 95% CI: (-2.2, 2.5)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-Magpie-Align-SFT-v0.2 | score: 21.9  | 95% CI: (-2.5, 2.5)  | average #tokens: 0
+allenai/llama-3-tulu-2-dpo-8b  | score: 18.4  | 95% CI: (-1.7, 1.8)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-Magpie-Align-v0.2 | score: 18.2  | 95% CI: (-2.6, 1.6)  | average #tokens: 0
+meta-llama/Meta-Llama-3-8B     | score:  3.8  | 95% CI: (-0.8, 0.8)  | average #tokens: 0
+facebook/opt-125m              | score:  2.2  | 95% CI: (-0.5, 0.6)  | average #tokens: 0
+(arena-hard-auto)  moonshine@MacBook-Pro  ~/workspace/arena-hard-auto   chiungyit/tryit ●  python show_result.py --output --judge-name QwQ-32B --baseline gpt-4-0314 --judgment-dir /Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed --target-metric "style_score"      
+Namespace(bench_name='arena-hard-v0.1', judge_name='QwQ-32B', baseline='gpt-4-0314', load_battles=False, load_bootstrap=False, show_elo=False, weight=3, num_rounds=100, output=True, first_game_only=False, answer_dir='', judgment_dir='/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed', target_metric='style_score')
+Turning judgment results into battles...
+100%|██████████████████████████████████████████████████████████████████████████████████| 12/12 [00:02<00:00,  4.31it/s]
+bootstrap: 100%|█████████████████████████████████████████████████████████████████████| 100/100 [00:03<00:00, 28.86it/s]
+Magpie-Align/Llama-3-8B-Magpie-Align-v0.2 | score: 59.6  | 95% CI: (-3.2, 3.4)  | average #tokens: 0
+gpt-4-0314                     | score: 50.0  | 95% CI:  (0.0, 0.0)  | average #tokens: 423
+gpt-4-0613                     | score: 40.6  | 95% CI: (-2.1, 2.3)  | average #tokens: 354
+meta-llama/Meta-Llama-3-8B-Instruct | score: 37.9  | 95% CI: (-2.4, 2.9)  | average #tokens: 0
+gpt-3.5-turbo-0125             | score: 37.0  | 95% CI: (-1.9, 2.2)  | average #tokens: 329
+Magpie-Align/Llama-3-8B-Magpie-Align-SFT-v0.2 | score: 34.8  | 95% CI: (-2.5, 3.3)  | average #tokens: 0
+allenai/llama-3-tulu-2-dpo-8b  | score: 21.0  | 95% CI: (-1.8, 2.6)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-WildChat | score: 15.5  | 95% CI: (-2.0, 1.6)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-Tulu-330K | score: 12.8  | 95% CI: (-1.9, 1.7)  | average #tokens: 0
+jondurbin/bagel-8b-v1.0        | score:  6.3  | 95% CI: (-1.2, 1.3)  | average #tokens: 0
+meta-llama/Meta-Llama-3-8B     | score:  1.6  | 95% CI: (-0.5, 0.6)  | average #tokens: 0
+facebook/opt-125m              | score:  1.2  | 95% CI: (-0.4, 0.4)  | average #tokens: 0
+(arena-hard-auto)  moonshine@MacBook-Pro  ~/workspace/arena-hard-auto   chiungyit/tryit ●  python show_result.py --output --judge-name QwQ-32B --baseline gpt-4-0314 --judgment-dir /Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed --target-metric "score_final"
+Namespace(bench_name='arena-hard-v0.1', judge_name='QwQ-32B', baseline='gpt-4-0314', load_battles=False, load_bootstrap=False, show_elo=False, weight=3, num_rounds=100, output=True, first_game_only=False, answer_dir='', judgment_dir='/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed', target_metric='score_final')
+Turning judgment results into battles...
+100%|██████████████████████████████████████████████████████████████████████████████████| 12/12 [00:02<00:00,  4.31it/s]
+bootstrap: 100%|█████████████████████████████████████████████████████████████████████| 100/100 [00:03<00:00, 28.92it/s]
+Magpie-Align/Llama-3-8B-Magpie-Align-v0.2 | score: 59.6  | 95% CI: (-3.2, 3.4)  | average #tokens: 0
+gpt-4-0314                     | score: 50.0  | 95% CI:  (0.0, 0.0)  | average #tokens: 423
+gpt-4-0613                     | score: 40.6  | 95% CI: (-2.1, 2.3)  | average #tokens: 354
+meta-llama/Meta-Llama-3-8B-Instruct | score: 37.9  | 95% CI: (-2.4, 2.9)  | average #tokens: 0
+gpt-3.5-turbo-0125             | score: 37.0  | 95% CI: (-1.9, 2.2)  | average #tokens: 329
+Magpie-Align/Llama-3-8B-Magpie-Align-SFT-v0.2 | score: 34.8  | 95% CI: (-2.5, 3.3)  | average #tokens: 0
+allenai/llama-3-tulu-2-dpo-8b  | score: 21.0  | 95% CI: (-1.8, 2.6)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-WildChat | score: 15.5  | 95% CI: (-2.0, 1.6)  | average #tokens: 0
+Magpie-Align/Llama-3-8B-Tulu-330K | score: 12.8  | 95% CI: (-1.9, 1.7)  | average #tokens: 0
+jondurbin/bagel-8b-v1.0        | score:  6.3  | 95% CI: (-1.2, 1.3)  | average #tokens: 0
+meta-llama/Meta-Llama-3-8B     | score:  1.6  | 95% CI: (-0.5, 0.6)  | average #tokens: 0
+facebook/opt-125m              | score:  1.2  | 95% CI: (-0.4, 0.4)  | average #tokens: 0
