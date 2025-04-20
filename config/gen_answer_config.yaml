@@ -11,4 +11,12 @@ model_list:
   #- gpt-3.5-turbo-0125
   #- Meta-Llama-3.3-70B-Instruct
   #- Meta-Llama-3.1-405B-Instruct
-  - Qwen2.5-72B-Instruct
+  - gemma-3-27b-it
+  - claude-3.7-sonnet
+  - gemini-2.5-flash-preview
+  - grok-3-beta
+  - cohere-command-R7B
+  - Qwen-Plus
+  - Mistral-8B
+  #- RWKV-v5-World-3B
+  - Phi4
