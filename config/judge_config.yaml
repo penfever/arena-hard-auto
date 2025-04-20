@@ -52,6 +52,17 @@ prompt_template: ["<|User Prompt|>\n{question_1}\n\n<|The Start of Assistant A's
 #   - opt-125m
 
 # r1 curation experiment: use sample responses from some of the models that are not in our test set, but are in the repository,
+#model_list:
+#  - dolphin-2.9-llama3-8b
+#  - gpt-4o-mini-2024-07-18
+
+# r1 curation as judge on new answers
 model_list:
-  - dolphin-2.9-llama3-8b
-  - gpt-4o-mini-2024-07-18
+  - gemma-3-27b-it
+  - claude-3.7-sonnet
+  - gemini-2.5-flash-preview
+  - grok-3-beta
+  - cohere-command-R7B
+  - Qwen-Plus
+  - Mistral-8B
+  - Phi4
