@@ -25,3 +25,11 @@ gpt-4-1106-preview:
     endpoints: null
     api_type: openai
     parallel: 8
+
+DeepSeek-R1:
+    model_name: DeepSeek-R1
+    endpoints:
+        - api_base: https://api.sambanova.ai/v1
+          api_key: *******************************
+    api_type: openai
+    parallel: 1

@@ -113,16 +113,17 @@ def get_win_rate_column(df, column, baseline="gpt-4-0314"):
     return win_rate_table[baseline].fillna(0.5).apply(lambda x: round(x * 100, 2))
 
 
-def get_battles_from_judgment(judge_name, first_game_only=False, WEIGHT=3, baseline_model="gpt-4-0314"):
+def get_battles_from_judgment(judge_name, first_game_only=False, WEIGHT=3, baseline_model="gpt-4-0314", args=None):
     arena_hard_battles = pd.DataFrame()
     
     print("Turning judgment results into battles...")
-
-    directory = f"data/arena-hard-v0.1/model_judgment/{judge_name}"
+    if args.judgment_dir == "":
+        directory = f"data/arena-hard-v0.1/model_judgment/{judge_name}_judge/{baseline_model}_base"
+    else:
+        directory = args.judgment_dir
     assert os.path.exists(directory)
     for file in tqdm(glob(f"{directory}/*jsonl")):
         df = pd.read_json(file, lines=True)
-
         for _, row in df.iterrows():
             # game 1
             output = {"question_id": row["question_id"],
@@ -132,16 +133,16 @@ def get_battles_from_judgment(judge_name, first_game_only=False, WEIGHT=3, basel
             game = row["games"][0]
 
             weight = 1
-            if game["score"] == "A=B":
+            if game[args.target_metric] == "A=B":
                 output["winner"] = "tie"
-            elif game["score"] == "A>B":
+            elif game[args.target_metric] == "A>B":
                 output["winner"] = "model_a"
-            elif game["score"] == "A>>B":
+            elif game[args.target_metric] == "A>>B":
                 output["winner"] = "model_a"
                 weight = WEIGHT
-            elif game["score"] == "B>A":
+            elif game[args.target_metric] == "B>A":
                 output["winner"] = "model_b"
-            elif game["score"] == "B>>A":
+            elif game[args.target_metric] == "B>>A":
                 output["winner"] = "model_b"
                 weight = WEIGHT
             else:
@@ -159,16 +160,16 @@ def get_battles_from_judgment(judge_name, first_game_only=False, WEIGHT=3, basel
                 game = row["games"][1]
 
                 weight = 1
-                if game["score"] == "A=B":
+                if game[args.target_metric] == "A=B":
                     output["winner"] = "tie"
-                elif game["score"] == "A>B":
+                elif game[args.target_metric] == "A>B":
                     output["winner"] = "model_b"
-                elif game["score"] == "A>>B":
+                elif game[args.target_metric] == "A>>B":
                     output["winner"] = "model_b"
                     weight = WEIGHT
-                elif game["score"] == "B>A":
+                elif game[args.target_metric] == "B>A":
                     output["winner"] = "model_a"
-                elif game["score"] == "B>>A":
+                elif game[args.target_metric] == "B>>A":
                     output["winner"] = "model_a"
                     weight = WEIGHT
                 else:
@@ -192,18 +193,23 @@ if __name__ == "__main__":
     parser.add_argument("--num-rounds", type=int, default=100)
     parser.add_argument("--output", action="store_true")
     parser.add_argument("--first-game-only", action="store_true")
+    parser.add_argument("--answer-dir", type=str, default="")
+    parser.add_argument("--judgment-dir", type=str, default="")
+    parser.add_argument("--target-metric", type=str, default="score")
     args = parser.parse_args()
     print(args)
     assert not args.load_bootstrap or (args.load_battles and args.load_bootstrap), "If loading prexisting bootstrapping data, you must also load preexisting battles."
-
-    answer_dir = os.path.join("data", args.bench_name, "model_answer")
+    if args.answer_dir == "":
+        answer_dir = os.path.join("data", args.bench_name, "model_answer")
+    else:
+        answer_dir = args.answer_dir
     model_answers = load_model_answers(answer_dir)
     
     if args.load_battles:
         assert os.path.exists("data/arena_hard_battles.jsonl")
         battles = pd.read_json("data/arena_hard_battles.jsonl", lines=True)
     else:
-        battles = get_battles_from_judgment(args.judge_name, args.first_game_only, args.weight, args.baseline)
+        battles = get_battles_from_judgment(args.judge_name, args.first_game_only, args.weight, args.baseline, args)
         
     bootstrap_online_elo = compute_mle_elo(battles, baseline_model=args.baseline)
 
@@ -223,7 +229,7 @@ if __name__ == "__main__":
         assert model in bootstrap_elo_lu.columns
 
         stats.at[i, "model"] = model
-        stats.at[i, "score"] = bootstrap_online_elo[model]
+        stats.at[i, args.target_metric] = bootstrap_online_elo[model]
         stats.at[i, "lower"] = np.percentile(bootstrap_elo_lu[model], 2.5)
         stats.at[i, "upper"] = np.percentile(bootstrap_elo_lu[model], 97.5)
 
@@ -239,18 +245,18 @@ if __name__ == "__main__":
     
     if not args.show_elo:
         stats.sort_values(by="model", inplace=True)
-        stats["score"] = get_win_rate_column(stats, "score", args.baseline).tolist()
+        stats[args.target_metric] = get_win_rate_column(stats, args.target_metric, args.baseline).tolist()
         stats["lower"] = get_win_rate_column(stats, "lower", args.baseline).tolist()
         stats["upper"] = get_win_rate_column(stats, "upper", args.baseline).tolist()
         decimal = 1
     else:
         decimal = 0
-        stats = stats.astype({"score" : int, "lower" : int, "upper" : int})
+        stats = stats.astype({args.target_metric : int, "lower" : int, "upper" : int})
     
-    stats.sort_values(by="score", ascending=False, inplace=True)
+    stats.sort_values(by=args.target_metric, ascending=False, inplace=True)
     for _, row in stats.iterrows():
-        interval = str((round(row['lower'] - row['score'], decimal), round(row['upper'] - row['score'], decimal)))
-        print(f"{row['model'] : <30} | score: {round(row['score'], decimal) : ^5} | 95% CI: {interval : ^12} | average #tokens: {int(row['avg_tokens'])}")
+        interval = str((round(row['lower'] - row[args.target_metric], decimal), round(row['upper'] - row[args.target_metric], decimal)))
+        print(f"{row['model'] : <30} | score: {round(row[args.target_metric], decimal) : ^5} | 95% CI: {interval : ^12} | average #tokens: {int(row['avg_tokens'])}")
 
     if args.output:
         cur_date = datetime.datetime.now()
@@ -258,7 +264,7 @@ if __name__ == "__main__":
         stats = stats.drop(columns=['results'])
         CI = []
         for i in range(len(stats)):
-            score = stats.iloc[i]['score']
+            score = stats.iloc[i][args.target_metric]
             upper = stats.iloc[i]['upper']
             lower = stats.iloc[i]['lower']
             CI.append(f"(-{(score-lower):.2f}, +{(upper-score):.2f})")
@@ -273,4 +279,4 @@ if __name__ == "__main__":
         col_list[-2], col_list[-1] = col_list[-1], col_list[-2]
         stats = stats.loc[:,col_list]
         stats['date'] = date_str[:4] + '-' + date_str[4:6] + '-' + date_str[6:]
-        stats.to_csv(f"leaderboard/arena_hard_leaderboard_{date_str}.csv", index=False)
+        stats.to_csv(f"leaderboard/arena_hard_leaderboard_{date_str}_{args.judge_name}_judge_{args.baseline}_base.csv", index=False)
