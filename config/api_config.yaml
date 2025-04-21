@@ -8,8 +8,26 @@
 #     tokenizer: str optional (to optimize token limits)
 #     parallel: int
 
+Meta-Llama-3.1-405B:
+    model_name: meta-llama/Meta-Llama-3.1-405B
+    endpoints: null
+    api_type: huggingface
+    parallel: 8
+
 gpt-3.5-turbo-0125:
     model_name: gpt-3.5-turbo-0125
+    endpoints: null
+    api_type: openai
+    parallel: 8
+
+gpt-4o-mini-2024-07-18:
+    model_name: gpt-4o-mini-2024-07-18
+    endpoints: null
+    api_type: openai
+    parallel: 8
+
+gpt-4-turbo-2024-04-09:
+    model_name: gpt-4-turbo-2024-04-09
     endpoints: null
     api_type: openai
     parallel: 8
@@ -23,5 +41,227 @@ gpt-4-0314:
 gpt-4-1106-preview:
     model_name: gpt-4-1106-preview
     endpoints: null
+    api_type: openai
+    parallel: 8
+
+claude-3-5-sonnet-20240620:
+    model_name: claude-3-5-sonnet-20240620
+    endpoints: null
+    api_type: anthropic
+    parallel: 8
+
+facebook/opt-125m:
+    model_name: facebook/opt-125m
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+meta-llama/Meta-Llama-3-8B:
+    model_name: meta-llama/Meta-Llama-3-8B
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+meta-llama/Meta-Llama-3-8B-Instruct:
+    model_name: meta-llama/Meta-Llama-3-8B-Instruct
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+Magpie-Align/Llama-3-8B-WizardLM-196K:
+    model_name: Magpie-Align/Llama-3-8B-WizardLM-196K
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+Dynosaur/llama3-8b-sft-full-mn:
+    model_name: Dynosaur/llama3-8b-sft-full-mn
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+openchat/openchat-3.6-8b-20240522:
+    model_name: openchat/openchat-3.6-8b-20240522
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+jondurbin/bagel-8b-v1.0:
+    model_name: jondurbin/bagel-8b-v1.0
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+cognitivecomputations/dolphin-2.9-llama3-8b:
+    model_name: cognitivecomputations/dolphin-2.9-llama3-8b
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+Magpie-Align/Llama-3-8B-Ultrachat-200K:
+    model_name: Magpie-Align/Llama-3-8B-Ultrachat-200K
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+Magpie-Align/Llama-3-8B-ShareGPT-112K:
+    model_name: Magpie-Align/Llama-3-8B-ShareGPT-112K
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+Magpie-Align/Llama-3-8B-Tulu-330K:
+    model_name: Magpie-Align/Llama-3-8B-Tulu-330K
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+Magpie-Align/Llama-3-8B-OpenHermes-243K:
+    model_name: Magpie-Align/Llama-3-8B-OpenHermes-243K
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+Magpie-Align/Llama-3-8B-WildChat:
+    model_name: Magpie-Align/Llama-3-8B-WildChat
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+Magpie-Align/Llama-3-8B-Magpie-Align-v0.2:
+    model_name: Magpie-Align/Llama-3-8B-Magpie-Align-v0.2
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+Magpie-Align/Llama-3-8B-Magpie-Align-SFT-v0.2:
+    model_name: Magpie-Align/Llama-3-8B-Magpie-Align-SFT-v0.2
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+princeton-nlp/Llama-3-Base-8B-SFT:
+    model_name: princeton-nlp/Llama-3-Base-8B-SFT
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+princeton-nlp/Llama-3-Base-8B-SFT-ORPO:
+    model_name: princeton-nlp/Llama-3-Base-8B-SFT-ORPO
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+princeton-nlp/Llama-3-Base-8B-SFT-DPO:
+    model_name: princeton-nlp/Llama-3-Base-8B-SFT-DPO
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+ntnhan/Llama3-8B-MetaMath:
+    model_name: ntnhan/Llama3-8B-MetaMath
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+hkust-nlp/dart-math-llama3-8b-prop2diff:
+    model_name: hkust-nlp/dart-math-llama3-8b-prop2diff
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+ajibawa-2023/Code-Llama-3-8B:
+    model_name: ajibawa-2023/Code-Llama-3-8B
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+HenryJJ/llama3-8B-lima:
+    model_name: HenryJJ/llama3-8B-lima
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+Replete-AI/Replete-Coder-Llama3-8B:
+    model_name: Replete-AI/Replete-Coder-Llama3-8B
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+allenai/llama-3-tulu-2-dpo-8b:
+    model_name: allenai/llama-3-tulu-2-dpo-8b
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+penfever/Llama-3-8B-NuminaCoT:
+    model_name: penfever/Llama-3-8B-NuminaCoT
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+penfever/Llama-3-8B-tulu-human:
+    model_name: penfever/Llama-3-8B-tulu-human
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
+    api_type: openai
+    parallel: 8
+
+NousResearch/Hermes-2-Pro-Llama-3-8B:
+    model_name: NousResearch/Hermes-2-Pro-Llama-3-8B
+    endpoints:
+        - api_base: http://127.0.0.1:35001/v1
+          api_key: 12345
     api_type: openai
     parallel: 8
