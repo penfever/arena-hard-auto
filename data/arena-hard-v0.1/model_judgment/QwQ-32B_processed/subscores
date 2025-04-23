@@ -1,0 +1,84 @@
+python show_result.py --output --judge-name QwQ-32B --baseline gpt-4-0314 --judgment-dir "/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed" --target-metric "score_final"
+Namespace(bench_name='arena-hard-v0.1', judge_name='QwQ-32B', baseline='gpt-4-0314', load_battles=False, load_bootstrap=False, show_elo=False, weight=3, num_rounds=100, output=True, first_game_only=False, answer_dir='', judgment_dir='/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed', target_metric='score_final')
+Turning judgment results into battles...
+100%|███████████████████████████████████████████████████████████████████████████████████████████| 8/8 [00:01<00:00,  4.41it/s]
+bootstrap: 100%|████████████████████████████████████████████████████████████████████████████| 100/100 [00:01<00:00, 65.28it/s]
+grok-3-beta                    | score: 93.8  | 95% CI: (-1.2, 1.2)  | average #tokens: 1325
+gemma-3-27b-it                 | score: 91.5  | 95% CI: (-1.6, 1.4)  | average #tokens: 1433
+gemini-2.5-flash-preview       | score: 89.7  | 95% CI: (-1.4, 1.8)  | average #tokens: 1603
+Qwen-Plus                      | score: 85.9  | 95% CI: (-1.7, 2.0)  | average #tokens: 930
+claude-3.7-sonnet              | score: 85.8  | 95% CI: (-1.6, 1.9)  | average #tokens: 808
+Phi4                           | score: 73.2  | 95% CI: (-2.3, 2.0)  | average #tokens: 640
+Mistral-8B                     | score: 52.5  | 95% CI: (-2.9, 2.3)  | average #tokens: 696
+gpt-4-0314                     | score: 50.0  | 95% CI:  (0.0, 0.0)  | average #tokens: 423
+cohere-command-R7B             | score: 45.5  | 95% CI: (-2.2, 2.7)  | average #tokens: 571
+(arena-hard-auto)  moonshine@MacBook-Pro  ~/workspace/arena-hard-auto   judge_on_new_answers ●  python show_result.py --output --judge-name QwQ-32B --baseline gpt-4-0314 --judgment-dir "/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed" --target-metric "correctness_score"
+Namespace(bench_name='arena-hard-v0.1', judge_name='QwQ-32B', baseline='gpt-4-0314', load_battles=False, load_bootstrap=False, show_elo=False, weight=3, num_rounds=100, output=True, first_game_only=False, answer_dir='', judgment_dir='/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed', target_metric='correctness_score')
+Turning judgment results into battles...
+100%|███████████████████████████████████████████████████████████████████████████████████████████| 8/8 [00:02<00:00,  3.96it/s]
+bootstrap: 100%|████████████████████████████████████████████████████████████████████████████| 100/100 [00:01<00:00, 52.52it/s]
+gemini-2.5-flash-preview       | score: 81.7  | 95% CI: (-1.5, 1.5)  | average #tokens: 1603
+grok-3-beta                    | score: 81.5  | 95% CI: (-1.2, 1.6)  | average #tokens: 1325
+claude-3.7-sonnet              | score: 78.1  | 95% CI: (-1.6, 1.9)  | average #tokens: 808
+gemma-3-27b-it                 | score: 77.6  | 95% CI: (-2.7, 1.8)  | average #tokens: 1433
+Qwen-Plus                      | score: 75.9  | 95% CI: (-1.8, 1.4)  | average #tokens: 930
+Phi4                           | score: 55.9  | 95% CI: (-2.4, 2.6)  | average #tokens: 640
+gpt-4-0314                     | score: 50.0  | 95% CI:  (0.0, 0.0)  | average #tokens: 423
+Mistral-8B                     | score: 31.2  | 95% CI: (-2.0, 2.5)  | average #tokens: 696
+cohere-command-R7B             | score: 23.3  | 95% CI: (-1.9, 2.1)  | average #tokens: 571
+(arena-hard-auto)  moonshine@MacBook-Pro  ~/workspace/arena-hard-auto   judge_on_new_answers ●  python show_result.py --output --judge-name QwQ-32B --baseline gpt-4-0314 --judgment-dir "/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed" --target-metric "completeness_score"
+Namespace(bench_name='arena-hard-v0.1', judge_name='QwQ-32B', baseline='gpt-4-0314', load_battles=False, load_bootstrap=False, show_elo=False, weight=3, num_rounds=100, output=True, first_game_only=False, answer_dir='', judgment_dir='/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed', target_metric='completeness_score')
+Turning judgment results into battles...
+100%|███████████████████████████████████████████████████████████████████████████████████████████| 8/8 [00:01<00:00,  4.07it/s]
+bootstrap: 100%|████████████████████████████████████████████████████████████████████████████| 100/100 [00:02<00:00, 47.67it/s]
+grok-3-beta                    | score: 96.9  | 95% CI: (-0.9, 0.5)  | average #tokens: 1325
+gemini-2.5-flash-preview       | score: 95.7  | 95% CI: (-0.9, 1.0)  | average #tokens: 1603
+gemma-3-27b-it                 | score: 95.6  | 95% CI: (-1.0, 0.8)  | average #tokens: 1433
+claude-3.7-sonnet              | score: 94.0  | 95% CI: (-0.9, 1.1)  | average #tokens: 808
+Qwen-Plus                      | score: 93.5  | 95% CI: (-1.1, 1.1)  | average #tokens: 930
+Phi4                           | score: 78.1  | 95% CI: (-2.2, 2.2)  | average #tokens: 640
+Mistral-8B                     | score: 54.3  | 95% CI: (-2.7, 2.5)  | average #tokens: 696
+gpt-4-0314                     | score: 50.0  | 95% CI:  (0.0, 0.0)  | average #tokens: 423
+cohere-command-R7B             | score: 39.8  | 95% CI: (-2.3, 3.0)  | average #tokens: 571
+(arena-hard-auto)  moonshine@MacBook-Pro  ~/workspace/arena-hard-auto   judge_on_new_answers ●  python show_result.py --output --judge-name QwQ-32B --baseline gpt-4-0314 --judgment-dir "/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed" --target-metric "safety_score"      
+Namespace(bench_name='arena-hard-v0.1', judge_name='QwQ-32B', baseline='gpt-4-0314', load_battles=False, load_bootstrap=False, show_elo=False, weight=3, num_rounds=100, output=True, first_game_only=False, answer_dir='', judgment_dir='/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed', target_metric='safety_score')
+Turning judgment results into battles...
+100%|███████████████████████████████████████████████████████████████████████████████████████████| 8/8 [00:01<00:00,  4.04it/s]
+bootstrap: 100%|████████████████████████████████████████████████████████████████████████████| 100/100 [00:01<00:00, 86.63it/s]
+gemma-3-27b-it                 | score: 57.6  | 95% CI: (-1.2, 1.3)  | average #tokens: 1433
+gemini-2.5-flash-preview       | score: 56.7  | 95% CI: (-1.0, 1.1)  | average #tokens: 1603
+grok-3-beta                    | score: 55.8  | 95% CI: (-1.0, 0.9)  | average #tokens: 1325
+claude-3.7-sonnet              | score: 53.6  | 95% CI: (-1.0, 0.8)  | average #tokens: 808
+Qwen-Plus                      | score: 53.5  | 95% CI: (-0.7, 1.0)  | average #tokens: 930
+Phi4                           | score: 51.3  | 95% CI: (-0.7, 0.8)  | average #tokens: 640
+gpt-4-0314                     | score: 50.0  | 95% CI:  (0.0, 0.0)  | average #tokens: 423
+cohere-command-R7B             | score: 49.9  | 95% CI: (-1.0, 0.7)  | average #tokens: 571
+Mistral-8B                     | score: 48.8  | 95% CI: (-0.8, 0.8)  | average #tokens: 696
+(arena-hard-auto)  moonshine@MacBook-Pro  ~/workspace/arena-hard-auto   judge_on_new_answers ●  python show_result.py --output --judge-name QwQ-32B --baseline gpt-4-0314 --judgment-dir "/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed" --target-metric "conciseness_score"
+Namespace(bench_name='arena-hard-v0.1', judge_name='QwQ-32B', baseline='gpt-4-0314', load_battles=False, load_bootstrap=False, show_elo=False, weight=3, num_rounds=100, output=True, first_game_only=False, answer_dir='', judgment_dir='/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed', target_metric='conciseness_score')
+Turning judgment results into battles...
+100%|███████████████████████████████████████████████████████████████████████████████████████████| 8/8 [00:01<00:00,  4.43it/s]
+bootstrap: 100%|████████████████████████████████████████████████████████████████████████████| 100/100 [00:01<00:00, 81.92it/s]
+gpt-4-0314                     | score: 50.0  | 95% CI:  (0.0, 0.0)  | average #tokens: 423
+claude-3.7-sonnet              | score: 28.5  | 95% CI: (-2.3, 2.3)  | average #tokens: 808
+cohere-command-R7B             | score: 25.2  | 95% CI: (-2.2, 2.4)  | average #tokens: 571
+Phi4                           | score: 24.6  | 95% CI: (-2.1, 2.0)  | average #tokens: 640
+Mistral-8B                     | score: 22.1  | 95% CI: (-1.4, 2.2)  | average #tokens: 696
+Qwen-Plus                      | score: 19.0  | 95% CI: (-2.2, 2.2)  | average #tokens: 930
+gemma-3-27b-it                 | score: 18.1  | 95% CI: (-1.6, 2.2)  | average #tokens: 1433
+gemini-2.5-flash-preview       | score: 16.3  | 95% CI: (-1.8, 1.5)  | average #tokens: 1603
+grok-3-beta                    | score: 15.7  | 95% CI: (-1.6, 1.8)  | average #tokens: 1325
+(arena-hard-auto)  moonshine@MacBook-Pro  ~/workspace/arena-hard-auto   judge_on_new_answers ●  python show_result.py --output --judge-name QwQ-32B --baseline gpt-4-0314 --judgment-dir "/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed" --target-metric "style_score"      
+Namespace(bench_name='arena-hard-v0.1', judge_name='QwQ-32B', baseline='gpt-4-0314', load_battles=False, load_bootstrap=False, show_elo=False, weight=3, num_rounds=100, output=True, first_game_only=False, answer_dir='', judgment_dir='/Users/moonshine/workspace/arena-hard-auto/data/arena-hard-v0.1/model_judgment/QwQ-32B_processed', target_metric='style_score')
+Turning judgment results into battles...
+100%|███████████████████████████████████████████████████████████████████████████████████████████| 8/8 [00:01<00:00,  4.48it/s]
+bootstrap: 100%|████████████████████████████████████████████████████████████████████████████| 100/100 [00:01<00:00, 79.07it/s]
+grok-3-beta                    | score: 93.8  | 95% CI: (-1.2, 1.2)  | average #tokens: 1325
+gemma-3-27b-it                 | score: 91.5  | 95% CI: (-1.6, 1.4)  | average #tokens: 1433
+gemini-2.5-flash-preview       | score: 89.7  | 95% CI: (-1.4, 1.8)  | average #tokens: 1603
+Qwen-Plus                      | score: 85.9  | 95% CI: (-1.7, 2.0)  | average #tokens: 930
+claude-3.7-sonnet              | score: 85.8  | 95% CI: (-1.6, 1.9)  | average #tokens: 808
+Phi4                           | score: 73.2  | 95% CI: (-2.3, 2.0)  | average #tokens: 640
+Mistral-8B                     | score: 52.5  | 95% CI: (-2.9, 2.3)  | average #tokens: 696
+gpt-4-0314                     | score: 50.0  | 95% CI:  (0.0, 0.0)  | average #tokens: 423
+cohere-command-R7B             | score: 45.5  | 95% CI: (-2.2, 2.7)  | average #tokens: 571

@@ -93,6 +93,61 @@ def make_config(config_file: str) -> dict:
 
     return config_kwargs
 
+import re
+
+def remove_special_tokens(messages):
+    # List of special tokens to remove
+    special_tokens = [
+        r'<\|im_start\|>', r'<\|im_end\|>',  # ChatML tokens
+        r'<s>', r'</s>', r'<\|eot_id\|>',     # LLaMA tokens
+        r'<\|endoftext\|>',                  # GPT special token
+    ]
+
+    new_messages = []
+    
+    # Combine all special tokens into a single regex pattern
+    pattern = '|'.join(special_tokens)
+    
+    for m in messages:
+
+
+        # Remove all instances of special tokens from the prompt
+        m['content'] = re.sub(pattern, '', m['content'])
+    
+        # Remove any extra whitespace that might have been left behind
+        m['content'] = ' '.join(m['content'].split())
+        new_messages.append(m)
+    
+    return new_messages
+
+def remove_duplicate_char_ngrams(messages, n):
+    new_messages = []
+    for m in messages:
+        # Generate character n-grams
+        text = m['content']
+        ngrams = [text[i:i+n] for i in range(len(text)-n+1)]
+        
+        # Keep track of seen n-grams
+        seen = set()
+        result = []
+        
+        for i, ngram in enumerate(ngrams):
+            if ngram not in seen:
+                # This is a new n-gram, add it to the result
+                result.append(text[i])
+                seen.add(ngram)
+            else:
+                # This is a duplicate n-gram, skip it
+                pass
+        
+        # Add any remaining characters
+        result.extend(text[len(text)-n+1:])
+        
+        # Join the characters back into a string
+        s = ''.join(result)
+        m['content'] = s
+        new_messages.append(m)
+    return new_messages
 
 def chat_completion_openai(model, messages, temperature, max_tokens, api_dict=None):
     import openai
@@ -103,7 +158,6 @@ def chat_completion_openai(model, messages, temperature, max_tokens, api_dict=No
         )
     else:
         client = openai.OpenAI()
-    
     output = API_ERROR_OUTPUT
     for _ in range(API_MAX_RETRY):
         try:
@@ -120,7 +174,12 @@ def chat_completion_openai(model, messages, temperature, max_tokens, api_dict=No
             time.sleep(API_RETRY_SLEEP)
         except openai.BadRequestError as e:
             print(messages)
-            print(type(e), e)
+            print(type(e), e, dir(e))
+            #NOTE: this has the potential to produce some pretty weird strings; should be careful here
+            # if e.error['code'] == 'invalid_prompt':
+            messages = remove_special_tokens(messages)
+            messages = remove_duplicate_char_ngrams(messages, 50)
+
         except KeyError:
             print(type(e), e)
             break
@@ -199,6 +258,18 @@ def chat_completion_anthropic(model, messages, temperature, max_tokens, api_dict
             time.sleep(API_RETRY_SLEEP)
     return output
 
+def chat_completion_huggingface(model, conv, temperature, max_tokens):
+    API_BASE = "https://api-inference.huggingface.co/models/"
+    API_URL = API_BASE + model
+    headers = {"Authorization": "Bearer " + str(os.environ["HUGGINGFACE_API_KEY"])}
+    query = {
+        "inputs": conv,
+    }
+    output = requests.post(API_URL, headers=headers, json=query)
+    output = output.json()
+    print(output)
+    breakpoint()
+    return 
 
 def chat_completion_mistral(model, messages, temperature, max_tokens):
     from mistralai.client import MistralClient
@@ -333,3 +404,42 @@ def reorg_answer_file(answer_file):
     with open(answer_file, "w") as fout:
         for qid in qids:
             fout.write(answers[qid])
+
+import json
+import re
+
+def write_with_subscores(input_file, output_file):
+    with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
+        for line in infile:
+            data = json.loads(line)
+            
+            for game in data['games']:
+                judgment = game['judgment']
+                
+                # Define regex patterns
+                patterns = {
+                    'correctness_score': r'Correctness: \(\(([AB<>=]+)\)\)',
+                    'completeness_score': r'Completeness: \(\(([AB<>=]+)\)\)',
+                    'safety_score': r'Safety: \(\(([AB<>=]+)\)\)',
+                    'conciseness_score': r'Conciseness: \(\(([AB<>=]+)\)\)',
+                    'style_score': r'Style: \(\(([AB<>=]+)\)\)'
+                }
+                
+                # Extract scores using regex
+                for key, pattern in patterns.items():
+                    match = re.search(pattern, judgment)
+                    game[key] = match.group(1) if match else ''
+                
+                # Ranking Logic
+                game['score_final'] = game['style_score']
+                # Reorder the dictionary to insert new keys after 'score'
+                keys = list(game.keys())
+                score_index = keys.index('score')
+                new_keys = keys[:score_index+1] + list(patterns.keys()) + keys[score_index+1:]
+                new_keys = [k for k in new_keys if k not in patterns]
+                
+                game = {k: game[k] for k in new_keys}
+            
+            # Write the modified data to the output file
+            json.dump(data, outfile)
+            outfile.write('\n')
