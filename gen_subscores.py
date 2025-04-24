@@ -2,7 +2,8 @@ from pathlib import Path
 from utils import write_with_subscores
 import os
 
-target_path = "/home/benfeuer/arena-hard-auto/data/arena-hard-v0.1/model_judgment/gpt-4o-mini-2024-07-18_judge/gpt-4-0314_base_v4_pairwise_noselfref"
+# get target path from command line arg
+target_path = os.sys.argv[1]
 
 dest_path = Path(target_path + "_processed")
 
