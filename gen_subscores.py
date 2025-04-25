@@ -13,7 +13,9 @@ jsons_to_process = list(Path(target_path).rglob("**/*.jsonl"))
 
 for item in jsons_to_process:
     filename = item.stem + item.suffix
+    filename_ct = item.stem + "_ct.txt"
+    filename_ct_path = dest_path / filename_ct
     tgt_file_path = dest_path / filename
     if tgt_file_path.is_file():
         Path.unlink(tgt_file_path)
-    write_with_subscores(item, tgt_file_path)
+    write_with_subscores(item, tgt_file_path, filename_ct_path)

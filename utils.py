@@ -408,8 +408,17 @@ def reorg_answer_file(answer_file):
 import json
 import re
 
-def write_with_subscores(input_file, output_file):
-    with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
+def write_with_subscores(input_file, output_file, count_file):
+    with open(input_file, 'r') as infile, open(output_file, 'w') as outfile, open(count_file, 'w') as countfile:
+        
+        success_counts = {
+            'correctness_score': 0,
+            'completeness_score': 0,
+            'safety_score': 0,
+            'conciseness_score': 0,
+            'style_score': 0,
+        }
+        
         for line in infile:
             data = json.loads(line)
             
@@ -422,16 +431,15 @@ def write_with_subscores(input_file, output_file):
                     'completeness_score': r'Completeness: \(\(([AB<>=]+)\)\)',
                     'safety_score': r'Safety: \(\(([AB<>=]+)\)\)',
                     'conciseness_score': r'Conciseness: \(\(([AB<>=]+)\)\)',
-                    'style_score': r'Style: \(\(([AB<>=]+)\)\)'
-                }
-                
-                # Extract scores using regex
+                    'style_score': r'Style: \(\(([AB<>=]+)\)\)',
+                }                
+
                 for key, pattern in patterns.items():
                     match = re.search(pattern, judgment)
+                    if match:
+                        success_counts[key] += 1
                     game[key] = match.group(1) if match else ''
                 
-                # Ranking Logic
-                game['score_final'] = game['style_score']
                 # Reorder the dictionary to insert new keys after 'score'
                 keys = list(game.keys())
                 score_index = keys.index('score')
@@ -439,7 +447,9 @@ def write_with_subscores(input_file, output_file):
                 new_keys = [k for k in new_keys if k not in patterns]
                 
                 game = {k: game[k] for k in new_keys}
-            
+
             # Write the modified data to the output file
             json.dump(data, outfile)
             outfile.write('\n')
+        json.dump(success_counts, countfile)
+        countfile.write('\n')
