@@ -107,9 +107,13 @@ def compute_correlations(df):
     score_df = df.drop('model', axis=1)
     
     # Reorder columns to ensure 'score' (if present) is the first column
+    # and other columns are sorted alphabetically
     if 'score' in score_df.columns:
-        cols = ['score'] + [col for col in score_df.columns if col != 'score']
+        other_cols = sorted([col for col in score_df.columns if col != 'score'])
+        cols = ['score'] + other_cols
         score_df = score_df[cols]
+    else:
+        score_df = score_df[sorted(score_df.columns)]
     
     # Remove columns with all NaN values
     score_df = score_df.dropna(axis=1, how='all')
