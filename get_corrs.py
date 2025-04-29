@@ -167,6 +167,12 @@ def plot_correlation_heatmap(corr_matrix, output_path):
 def main():
     parser = argparse.ArgumentParser(description='Compute correlations between score columns in CSV files.')
     parser.add_argument('directory', type=str, help='Directory containing CSV files with score columns')
+    parser.add_argument('--factor-analysis', action='store_true', 
+                        help='Run factor analysis after computing correlations')
+    parser.add_argument('--analyze-questions', action='store_true',
+                        help='Analyze question reliability when running factor analysis')
+    parser.add_argument('--threshold', type=float, default=2.0,
+                        help='Threshold for standardized residuals to flag low reliability questions (default: 2.0)')
     args = parser.parse_args()
     
     # Load and join scores
@@ -196,6 +202,18 @@ def main():
     output_heatmap_path = os.path.join(args.directory, "score_correlations_heatmap.png")
     plot_correlation_heatmap(corr_matrix, output_heatmap_path)
     print(f"Saved correlation heatmap to {output_heatmap_path}")
+    
+    # Run factor analysis if requested
+    if args.factor_analysis and len(joined_df.columns) > 2:  # Need model + at least 2 score columns
+        try:
+            # Import and run factor analysis
+            from factor_analysis import run_factor_analysis
+            print("\nRunning factor analysis...")
+            run_factor_analysis(joined_df, args.directory, analyze_questions=args.analyze_questions, threshold=args.threshold)
+        except ImportError:
+            print("\nFactor analysis module not found. Run 'factor_analysis.py' separately.")
+        except Exception as e:
+            print(f"\nError running factor analysis: {e}")
 
 if __name__ == "__main__":
     main()

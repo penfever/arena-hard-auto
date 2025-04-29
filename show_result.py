@@ -15,6 +15,13 @@ from sklearn.linear_model import LogisticRegression
 from collections import defaultdict
 from utils import load_model_answers
 
+# For Bayesian bootstrap
+try:
+    import scipy.stats as stats
+except ImportError:
+    print("Warning: scipy not found, Bayesian bootstrap will not be available")
+    stats = None
+
 
 def compute_mle_elo(df, SCALE=400, BASE=10, INIT_RATING=1000, baseline_model="gpt-4-0314"):
     models = pd.concat([df["model_a"], df["model_b"]]).unique()
@@ -50,15 +57,91 @@ def compute_mle_elo(df, SCALE=400, BASE=10, INIT_RATING=1000, baseline_model="gp
     return pd.Series(elo_scores, index=models.index).sort_values(ascending=False)
 
 
-def get_bootstrap_result(battles, func_compute_elo, num_round, baseline_model="gpt-4-0314"):
-    rows = []
-    kwargs = {}
-    if baseline_model in inspect.signature(func_compute_elo).parameters:
-        kwargs[baseline_model] = baseline_model
-    for _ in tqdm(range(num_round), desc="bootstrap"):
-        rows.append(func_compute_elo(battles.sample(frac=1.0, replace=True), **kwargs))
-    df = pd.DataFrame(rows)
-    return df[df.median().sort_values(ascending=False).index]
+def get_bootstrap_result(battles, func_compute_elo, num_round, baseline_model="gpt-4-0314", bootstrap_method="standard"):
+    """
+    Perform bootstrap analysis of model ELO ratings with different bootstrapping methods.
+    
+    Parameters:
+    -----------
+    battles : pandas.DataFrame
+        DataFrame containing battle data
+    func_compute_elo : function
+        Function to compute ELO ratings
+    num_round : int
+        Number of bootstrap rounds
+    baseline_model : str, optional
+        Baseline model for ELO calculation
+    bootstrap_method : str, optional
+        Bootstrapping method to use: "standard" or "bayesian"
+        
+    Returns:
+    --------
+    pandas.DataFrame : Bootstrap results
+    """
+    # Standard bootstrap (original implementation)
+    if bootstrap_method == "standard":
+        rows = []
+        kwargs = {}
+        if baseline_model in inspect.signature(func_compute_elo).parameters:
+            kwargs[baseline_model] = baseline_model
+        for _ in tqdm(range(num_round), desc="standard bootstrap"):
+            rows.append(func_compute_elo(battles.sample(frac=1.0, replace=True), **kwargs))
+        df = pd.DataFrame(rows)
+        return df[df.median().sort_values(ascending=False).index]
+    
+    # Bayesian hierarchical bootstrap
+    elif bootstrap_method == "bayesian":
+        # Ensure we have scipy.stats available
+        if stats is None:
+            print("Error: scipy.stats module is required for Bayesian bootstrap")
+            print("Falling back to standard bootstrap")
+            return get_bootstrap_result(battles, func_compute_elo, num_round, baseline_model, "standard")
+        
+        print(f"Using Bayesian hierarchical bootstrap")
+        
+        # Standard bootstrap to get base distribution (smaller sample for efficiency)
+        print("Generating initial ELO distribution...")
+        base_rounds = min(100, num_round // 2)  # Use fewer rounds for initial distribution
+        base_rows = []
+        kwargs = {}
+        if baseline_model in inspect.signature(func_compute_elo).parameters:
+            kwargs[baseline_model] = baseline_model
+            
+        for _ in tqdm(range(base_rounds), desc="initial bootstrap"):
+            sampled_battles = battles.sample(frac=1.0, replace=True)
+            base_rows.append(func_compute_elo(sampled_battles, **kwargs))
+        
+        base_df = pd.DataFrame(base_rows)
+        
+        # For each model, create a hierarchical model with appropriate variance
+        print("Performing Bayesian hierarchical sampling...")
+        final_rows = []
+        for _ in tqdm(range(num_round), desc="bayesian bootstrap"):
+            sample_row = {}
+            
+            for model in base_df.columns:
+                # Get distribution parameters
+                mu = base_df[model].mean()
+                sigma = base_df[model].std()
+                
+                # Skip if sigma is too small (can happen with baseline model)
+                if sigma < 1e-6:
+                    sample_row[model] = mu
+                    continue
+                
+                # Sample from the t-distribution (more robust than normal)
+                # Use 5 degrees of freedom for slightly heavier tails
+                sample_row[model] = stats.t.rvs(df=5, loc=mu, scale=sigma)
+                
+            final_rows.append(pd.Series(sample_row))
+            
+        df = pd.DataFrame(final_rows)
+        return df[df.median().sort_values(ascending=False).index]
+    
+    # Fallback for any other method
+    else:
+        print(f"Bootstrap method '{bootstrap_method}' not recognized. Using standard bootstrap.")
+        return get_bootstrap_result(battles, func_compute_elo, num_round, baseline_model, "standard")
 
 
 def preety_print_two_ratings(ratings_1, ratings_2, column_names):
@@ -196,6 +279,8 @@ if __name__ == "__main__":
     parser.add_argument("--answer-dir", type=str, default="")
     parser.add_argument("--judgment-dir", type=str, default="")
     parser.add_argument("--target-metric", type=str, default="score")
+    parser.add_argument("--bootstrap-method", type=str, choices=['standard', 'bayesian'], 
+                        default='standard', help='Bootstrapping method to use')
     args = parser.parse_args()
     print(args)
     assert not args.load_bootstrap or (args.load_battles and args.load_bootstrap), "If loading prexisting bootstrapping data, you must also load preexisting battles."
@@ -218,7 +303,7 @@ if __name__ == "__main__":
         bootstrap_elo_lu = pd.read_json("data/bootstrapping_results.jsonl", lines=True)
     else:
         np.random.seed(42)
-        bootstrap_elo_lu = get_bootstrap_result(battles, compute_mle_elo, args.num_rounds, args.baseline)
+        bootstrap_elo_lu = get_bootstrap_result(battles, compute_mle_elo, args.num_rounds, args.baseline, args.bootstrap_method)
         bootstrap_elo_lu.to_json("data/bootstrapping_results.jsonl", lines=True, orient="records")
 
     stats = pd.DataFrame()

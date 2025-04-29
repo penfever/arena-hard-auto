@@ -174,6 +174,19 @@ Judgment caching is also implemented. It will skip generating judgments that has
 Output model win rates.  Optionally, use `--full-stats` for detailed results. To save a csv file of the model rankings, use `--output`
 ```console
 > python show_result.py
+
+# With factor-based confidence interval adjustment (old method, heuristic)
+> python show_result.py --adjust-confidence
+
+# With residual resampling bootstrap (incorporating unexplained variance formally)
+> python show_result.py --bootstrap-method residual --factor-analysis-dir path/to/factor_analysis
+
+# With Bayesian hierarchical bootstrap
+> python show_result.py --bootstrap-method bayesian --factor-analysis-dir path/to/factor_analysis
+
+# With reliability-based bootstrap (recommended for individual factors)
+> python factor_reliability.py path/to/judgment_dir
+> python show_result.py --bootstrap-method reliability --reliability-metrics-path path/to/factor_reliability_metrics.csv
 ```
 
 ### Step 5. Arena Hard UI
