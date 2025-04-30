@@ -283,6 +283,8 @@ if __name__ == "__main__":
                         default='standard', help='Bootstrapping method to use')
     parser.add_argument("--communalities-file", type=str, default="", 
                         help='Path to factor analysis communalities file to adjust bootstrap confidence intervals')
+    parser.add_argument("--reliability-file", type=str, default="", 
+                        help='Path to reliability metrics file to further adjust bootstrap confidence intervals')
     args = parser.parse_args()
     print(args)
     assert not args.load_bootstrap or (args.load_battles and args.load_bootstrap), "If loading prexisting bootstrapping data, you must also load preexisting battles."
@@ -308,8 +310,10 @@ if __name__ == "__main__":
         bootstrap_elo_lu = get_bootstrap_result(battles, compute_mle_elo, args.num_rounds, args.baseline, args.bootstrap_method)
         bootstrap_elo_lu.to_json("data/bootstrapping_results.jsonl", lines=True, orient="records")
         
+    # Initialize variance adjustment factors
+    adjustment_factors = []
+    
     # Load communalities file if provided to adjust confidence intervals
-    communality_factor = 1.0
     if args.communalities_file and os.path.exists(args.communalities_file):
         try:
             print(f"Loading communalities file: {args.communalities_file}")
@@ -337,11 +341,56 @@ if __name__ == "__main__":
             if communality > 0:
                 communality_factor = np.sqrt(1 / communality)
                 print(f"Adjusting confidence intervals using communality factor: {communality_factor:.4f}")
+                adjustment_factors.append((1 - communality) / communality)  # Store variance component for later combination
             else:
-                print("Warning: Invalid communality value (zero or negative). Using standard confidence intervals.")
+                print("Warning: Invalid communality value (zero or negative). Not using this adjustment.")
         except Exception as e:
             print(f"Error loading communalities file: {e}")
-            print("Using standard confidence intervals")
+    
+    # Load reliability metrics file if provided to further adjust confidence intervals
+    if args.reliability_file and os.path.exists(args.reliability_file):
+        try:
+            print(f"Loading reliability metrics file: {args.reliability_file}")
+            reliability_df = pd.read_csv(args.reliability_file)
+            # First column might be named differently
+            first_col = reliability_df.columns[0]
+            metric_col = f"{args.target_metric}"
+            
+            # For general "score" metric, use mean reliability of all factors
+            if metric_col == "score":
+                # Calculate mean of all reliability scores
+                mean_reliability = reliability_df['reliability_score'].mean()
+                reliability = mean_reliability
+                print(f"Using mean reliability ({mean_reliability:.4f}) for general 'score' metric")
+            # Otherwise, check if the specific metric exists in the reliability file
+            elif metric_col in reliability_df[first_col].values:
+                reliability = reliability_df.loc[reliability_df[first_col] == metric_col, 'reliability_score'].values[0]
+            else:
+                print(f"Warning: Target metric '{metric_col}' not found in reliability file")
+                reliability = 1.0
+                
+            # Calculate adjustment factor based on reliability
+            # Using the same variance components model approach
+            if reliability > 0 and reliability < 1:  # reliability should be between 0 and 1
+                reliability_factor = np.sqrt(1 / reliability)
+                print(f"Adjusting confidence intervals using reliability factor: {reliability_factor:.4f}")
+                adjustment_factors.append((1 - reliability) / reliability)  # Store variance component for later combination
+            else:
+                print("Warning: Invalid reliability value. Not using this adjustment.")
+        except Exception as e:
+            print(f"Error loading reliability file: {e}")
+    
+    # Combine all variance components using the variance components model
+    # sqrt(var1 + var2 + var3 + ...)
+    if adjustment_factors:
+        # Calculate combined variance components
+        combined_variance_ratio = sum(adjustment_factors)
+        # Convert to a scaling factor for confidence intervals
+        combined_factor = np.sqrt(1 + combined_variance_ratio)
+        print(f"Combined adjustment factor from {len(adjustment_factors)} sources: {combined_factor:.4f}")
+    else:
+        combined_factor = 1.0
+        print("No valid adjustment factors found. Using standard confidence intervals.")
 
     stats = pd.DataFrame()
     stats["results"] = None
@@ -353,16 +402,16 @@ if __name__ == "__main__":
         stats.at[i, "model"] = model
         stats.at[i, args.target_metric] = bootstrap_online_elo[model]
         
-        # Calculate adjusted confidence intervals using communality factor
-        if communality_factor > 1.0:
+        # Calculate adjusted confidence intervals using combined factor
+        if combined_factor > 1.0:
             # Get the median value
             median = np.median(bootstrap_elo_lu[model])
             # Calculate the distance from the median
             lower_distance = median - np.percentile(bootstrap_elo_lu[model], 2.5)
             upper_distance = np.percentile(bootstrap_elo_lu[model], 97.5) - median
-            # Apply the communality factor to adjust the distances
-            adjusted_lower = median - (lower_distance * communality_factor)
-            adjusted_upper = median + (upper_distance * communality_factor)
+            # Apply the combined factor to adjust the distances
+            adjusted_lower = median - (lower_distance * combined_factor)
+            adjusted_upper = median + (upper_distance * combined_factor)
             stats.at[i, "lower"] = adjusted_lower
             stats.at[i, "upper"] = adjusted_upper
         else:
@@ -416,6 +465,13 @@ if __name__ == "__main__":
         col_list[-2], col_list[-1] = col_list[-1], col_list[-2]
         stats = stats.loc[:,col_list]
         stats['date'] = date_str[:4] + '-' + date_str[4:6] + '-' + date_str[6:]
-        # Add communality indicator to filename if used
-        comm_suffix = "_communality" if args.communalities_file else ""
-        stats.to_csv(f"leaderboard/arena_hard_leaderboard_{date_str}_{args.judge_name}_judge_{args.baseline}_base_{args.target_metric}_factor{comm_suffix}.csv", index=False)
+        # Add indicators to filename based on what adjustment factors were used
+        adjustment_suffix = ""
+        if args.communalities_file and args.reliability_file:
+            adjustment_suffix = "_variance_combined"
+        elif args.communalities_file:
+            adjustment_suffix = "_communality"
+        elif args.reliability_file:
+            adjustment_suffix = "_reliability"
+            
+        stats.to_csv(f"leaderboard/arena_hard_leaderboard_{date_str}_{args.judge_name}_judge_{args.baseline}_base_{args.target_metric}_factor{adjustment_suffix}.csv", index=False)
