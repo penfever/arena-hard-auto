@@ -193,13 +193,17 @@ def main():
     pd.set_option('display.width', 120)
     print(corr_matrix)
     
+    # Create score_correlations directory if it doesn't exist
+    correlations_dir = os.path.join(args.directory, "..", "score_correlations")
+    os.makedirs(correlations_dir, exist_ok=True)
+    
     # Save the correlation matrix to a CSV file
-    output_csv_path = os.path.join(args.directory, "score_correlations.csv")
+    output_csv_path = os.path.join(correlations_dir, "score_correlations.csv")
     corr_matrix.to_csv(output_csv_path)
     print(f"\nSaved correlation matrix to {output_csv_path}")
     
     # Create and save heatmap visualization
-    output_heatmap_path = os.path.join(args.directory, "score_correlations_heatmap.png")
+    output_heatmap_path = os.path.join(correlations_dir, "score_correlations_heatmap.png")
     plot_correlation_heatmap(corr_matrix, output_heatmap_path)
     print(f"Saved correlation heatmap to {output_heatmap_path}")
     

@@ -732,6 +732,14 @@ def run_factor_analysis(df, output_dir, min_eigenvalue=0.75, analyze_questions=F
     --------
     dict : Results of the factor analysis
     """
+    # Create factor analysis subdirectory
+    factor_analysis_dir = os.path.join(output_dir, "tables", "factor_analysis")
+    os.makedirs(factor_analysis_dir, exist_ok=True)
+    
+    # Create question reliability subdirectory if needed
+    if analyze_questions:
+        question_reliability_dir = os.path.join(output_dir, "tables", "question_reliability")
+        os.makedirs(question_reliability_dir, exist_ok=True)
     # Check if data is suitable for factor analysis
     suitable, suitability_results = check_factor_analysis_suitability(df)
     
@@ -766,7 +774,7 @@ def run_factor_analysis(df, output_dir, min_eigenvalue=0.75, analyze_questions=F
     eigenvalues, _ = fa_initial.get_eigenvalues()
     
     # Save scree plot
-    scree_plot_path = os.path.join(output_dir, "factor_scree_plot.png")
+    scree_plot_path = os.path.join(factor_analysis_dir, "factor_scree_plot.png")
     plot_factor_scree(eigenvalues, scree_plot_path, min_eigenvalue=min_eigenvalue)
     print(f"Saved scree plot to {scree_plot_path}")
     
@@ -774,33 +782,33 @@ def run_factor_analysis(df, output_dir, min_eigenvalue=0.75, analyze_questions=F
     fa_results = perform_factor_analysis(df, rotation='varimax', min_eigenvalue=min_eigenvalue)
     
     # Save factor loadings
-    loadings_path = os.path.join(output_dir, "factor_loadings.csv")
+    loadings_path = os.path.join(factor_analysis_dir, "factor_loadings.csv")
     fa_results["loadings"].to_csv(loadings_path)
     print(f"Saved factor loadings to {loadings_path}")
     
     # Save factor loadings heatmap
-    loadings_plot_path = os.path.join(output_dir, "factor_loadings_heatmap.png")
+    loadings_plot_path = os.path.join(factor_analysis_dir, "factor_loadings_heatmap.png")
     plot_factor_loadings(fa_results["loadings"], loadings_plot_path)
     print(f"Saved factor loadings heatmap to {loadings_plot_path}")
     
     # Create factor interpretation plot
-    interpretation_path = os.path.join(output_dir, "factor_interpretation.png")
+    interpretation_path = os.path.join(factor_analysis_dir, "factor_interpretation.png")
     plot_factor_interpretation(fa_results["loadings"], interpretation_path, threshold=0.5)
     print(f"Saved factor interpretation plot to {interpretation_path}")
     
     # Save variance information
-    variance_path = os.path.join(output_dir, "factor_variance.csv")
+    variance_path = os.path.join(factor_analysis_dir, "factor_variance.csv")
     fa_results["variance"].to_csv(variance_path)
     print(f"Saved variance information to {variance_path}")
     
     # Save communalities
-    communalities_path = os.path.join(output_dir, "factor_communalities.csv")
+    communalities_path = os.path.join(factor_analysis_dir, "factor_communalities.csv")
     fa_results["communalities"].to_csv(communalities_path)
     print(f"Saved communalities to {communalities_path}")
     
     # If we have at least 2 factors, create a biplot
     if fa_results["n_factors"] >= 2:
-        biplot_path = os.path.join(output_dir, "factor_biplot.png")
+        biplot_path = os.path.join(factor_analysis_dir, "factor_biplot.png")
         plot_factor_biplot(fa_results, df, biplot_path)
         print(f"Saved factor biplot to {biplot_path}")
         
@@ -809,12 +817,12 @@ def run_factor_analysis(df, output_dir, min_eigenvalue=0.75, analyze_questions=F
     
     if poly_importances is not None:
         # Save polynomial importances to CSV
-        poly_importances_path = os.path.join(output_dir, "polynomial_factor_importances.csv")
+        poly_importances_path = os.path.join(factor_analysis_dir, "polynomial_factor_importances.csv")
         poly_importances.to_frame('coefficient').to_csv(poly_importances_path)
         print(f"Saved polynomial factor importances to {poly_importances_path}")
         
         # Save R² values to text file
-        r2_info_path = os.path.join(output_dir, "r2_comparison.txt")
+        r2_info_path = os.path.join(factor_analysis_dir, "r2_comparison.txt")
         with open(r2_info_path, 'w') as f:
             f.write(f"Linear model R²: {linear_r2:.6f}\n")
             f.write(f"Polynomial model R²: {poly_r2:.6f}\n")
@@ -823,7 +831,7 @@ def run_factor_analysis(df, output_dir, min_eigenvalue=0.75, analyze_questions=F
         print(f"Saved R² comparison information to {r2_info_path}")
         
         # Create polynomial importance plot
-        poly_plot_path = os.path.join(output_dir, "polynomial_importance.png")
+        poly_plot_path = os.path.join(factor_analysis_dir, "polynomial_importance.png")
         plot_polynomial_importance(poly_importances, linear_r2, poly_r2, poly_plot_path)
         print(f"Saved polynomial importance plot to {poly_plot_path}")
     
@@ -834,7 +842,7 @@ def run_factor_analysis(df, output_dir, min_eigenvalue=0.75, analyze_questions=F
             low_reliability = identify_low_reliability_questions(df, fa_results, threshold=threshold)
             if low_reliability is not None:
                 # Save to CSV
-                low_reliability_path = os.path.join(output_dir, "question_reliability.csv")
+                low_reliability_path = os.path.join(question_reliability_dir, "question_reliability.csv")
                 low_reliability.to_csv(low_reliability_path, index=False)
                 print(f"Saved question reliability analysis to {low_reliability_path}")
                 
@@ -874,7 +882,7 @@ def run_factor_analysis(df, output_dir, min_eigenvalue=0.75, analyze_questions=F
                     low_rel_questions['cluster'] = kmeans.fit_predict(cluster_data)
                     
                     # Save clustered questions
-                    clusters_path = os.path.join(output_dir, "question_reliability_clusters.csv")
+                    clusters_path = os.path.join(question_reliability_dir, "question_reliability_clusters.csv")
                     low_rel_questions.to_csv(clusters_path, index=False)
                     print(f"Saved {best_k} clusters of low reliability questions to {clusters_path}")
         except Exception as e:

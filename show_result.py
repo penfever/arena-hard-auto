@@ -204,62 +204,116 @@ def get_battles_from_judgment(judge_name, first_game_only=False, WEIGHT=3, basel
         directory = f"data/arena-hard-v0.1/model_judgment/{judge_name}_judge/{baseline_model}_base"
     else:
         directory = args.judgment_dir
-    assert os.path.exists(directory)
-    for file in tqdm(glob(f"{directory}/*jsonl")):
-        df = pd.read_json(file, lines=True)
-        for _, row in df.iterrows():
-            # game 1
-            output = {"question_id": row["question_id"],
-                    "model_a": baseline_model,
-                    "model_b": row["model"]}
+        
+    # Check if directory exists
+    if not os.path.exists(directory):
+        print(f"Error: Directory {directory} does not exist")
+        # Return empty DataFrame with the expected columns
+        return pd.DataFrame(columns=["question_id", "model_a", "model_b", "winner"])
+    
+    # Check if directory contains any JSONL files
+    jsonl_files = glob(f"{directory}/*jsonl")
+    if not jsonl_files:
+        print(f"Warning: No JSONL files found in {directory}")
+        # Return empty DataFrame with the expected columns
+        return pd.DataFrame(columns=["question_id", "model_a", "model_b", "winner"])
+    
+    # Process each JSONL file
+    for file in tqdm(jsonl_files):
+        try:
+            df = pd.read_json(file, lines=True)
+            
+            # Check if DataFrame is empty
+            if df.empty:
+                print(f"Warning: Empty file: {file}")
+                continue
+                
+            # Check if required columns exist
+            if "question_id" not in df.columns or "model" not in df.columns or "games" not in df.columns:
+                print(f"Warning: File {file} missing required columns")
+                continue
+                
+            for _, row in df.iterrows():
+                try:
+                    # Check if games is a list and has at least one element
+                    if not isinstance(row["games"], list) or len(row["games"]) == 0:
+                        print(f"Warning: Invalid games data in file {file}")
+                        continue
+                    
+                    # game 1
+                    output = {"question_id": row["question_id"],
+                            "model_a": baseline_model,
+                            "model_b": row["model"]}
 
-            game = row["games"][0]
+                    # Check if the target metric exists in the game data
+                    game = row["games"][0]
+                    if args.target_metric not in game:
+                        print(f"Warning: Metric {args.target_metric} not found in game data")
+                        continue
 
-            weight = 1
-            if game[args.target_metric] == "A=B":
-                output["winner"] = "tie"
-            elif game[args.target_metric] == "A>B":
-                output["winner"] = "model_a"
-            elif game[args.target_metric] == "A>>B":
-                output["winner"] = "model_a"
-                weight = WEIGHT
-            elif game[args.target_metric] == "B>A":
-                output["winner"] = "model_b"
-            elif game[args.target_metric] == "B>>A":
-                output["winner"] = "model_b"
-                weight = WEIGHT
-            else:
-                weight = 0
+                    weight = 1
+                    if game[args.target_metric] == "A=B":
+                        output["winner"] = "tie"
+                    elif game[args.target_metric] == "A>B":
+                        output["winner"] = "model_a"
+                    elif game[args.target_metric] == "A>>B":
+                        output["winner"] = "model_a"
+                        weight = WEIGHT
+                    elif game[args.target_metric] == "B>A":
+                        output["winner"] = "model_b"
+                    elif game[args.target_metric] == "B>>A":
+                        output["winner"] = "model_b"
+                        weight = WEIGHT
+                    else:
+                        weight = 0
 
-            if weight:
-                arena_hard_battles = pd.concat([arena_hard_battles, pd.DataFrame([output] * weight)])
+                    if weight:
+                        arena_hard_battles = pd.concat([arena_hard_battles, pd.DataFrame([output] * weight)])
 
-            if not first_game_only:
-                # game 2
-                output = {"question_id": row["question_id"],
-                        "model_a": baseline_model,
-                        "model_b": row["model"]}
+                    if not first_game_only and len(row["games"]) > 1:
+                        # game 2
+                        output = {"question_id": row["question_id"],
+                                "model_a": baseline_model,
+                                "model_b": row["model"]}
 
-                game = row["games"][1]
+                        game = row["games"][1]
+                        
+                        # Check if the target metric exists in the second game
+                        if args.target_metric not in game:
+                            continue
 
-                weight = 1
-                if game[args.target_metric] == "A=B":
-                    output["winner"] = "tie"
-                elif game[args.target_metric] == "A>B":
-                    output["winner"] = "model_b"
-                elif game[args.target_metric] == "A>>B":
-                    output["winner"] = "model_b"
-                    weight = WEIGHT
-                elif game[args.target_metric] == "B>A":
-                    output["winner"] = "model_a"
-                elif game[args.target_metric] == "B>>A":
-                    output["winner"] = "model_a"
-                    weight = WEIGHT
-                else:
-                    weight = 0
+                        weight = 1
+                        if game[args.target_metric] == "A=B":
+                            output["winner"] = "tie"
+                        elif game[args.target_metric] == "A>B":
+                            output["winner"] = "model_b"
+                        elif game[args.target_metric] == "A>>B":
+                            output["winner"] = "model_b"
+                            weight = WEIGHT
+                        elif game[args.target_metric] == "B>A":
+                            output["winner"] = "model_a"
+                        elif game[args.target_metric] == "B>>A":
+                            output["winner"] = "model_a"
+                            weight = WEIGHT
+                        else:
+                            weight = 0
 
-                if weight:
-                    arena_hard_battles = pd.concat([arena_hard_battles, pd.DataFrame([output] * weight)])
+                        if weight:
+                            arena_hard_battles = pd.concat([arena_hard_battles, pd.DataFrame([output] * weight)])
+                except Exception as e:
+                    print(f"Error processing row: {e}")
+                    continue
+        except Exception as e:
+            print(f"Error processing file {file}: {e}")
+            continue
+    
+    # Check if we found any valid battles
+    if arena_hard_battles.empty:
+        print("Warning: No valid battles found")
+        return pd.DataFrame(columns=["question_id", "model_a", "model_b", "winner"])
+    
+    # Save battles to file
+    os.makedirs("data", exist_ok=True)
     arena_hard_battles.to_json("data/arena_hard_battles.jsonl", lines=True, orient="records")
     return arena_hard_battles
 
@@ -474,4 +528,17 @@ if __name__ == "__main__":
         elif args.reliability_file:
             adjustment_suffix = "_reliability"
             
-        stats.to_csv(f"leaderboard/arena_hard_leaderboard_{date_str}_{args.judge_name}_judge_{args.baseline}_base_{args.target_metric}_factor{adjustment_suffix}.csv", index=False)
+        # Create leaderboard directory if it doesn't exist
+        os.makedirs("leaderboard", exist_ok=True)
+        
+        # Determine the output directory based on adjustment factors
+        if args.communalities_file or args.reliability_file:
+            output_subdir = "factor_scores_updated_cis"
+        else:
+            output_subdir = "factor_scores_original_cis"
+            
+        # Create the filename
+        filename = f"arena_hard_leaderboard_{date_str}_{args.judge_name}_judge_{args.baseline}_base_{args.target_metric}_factor{adjustment_suffix}.csv"
+        
+        # Save to the leaderboard directory (will be moved by the shell script)
+        stats.to_csv(f"leaderboard/{filename}", index=False)
