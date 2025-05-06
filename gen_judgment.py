@@ -96,7 +96,7 @@ def get_score_logprobs(judgment, patterns, logprobs, pairwise=True):
     Args:
         judgment: The text of the judgment
         patterns: List of dicts, each with 'name' and 'pattern' keys
-        logprobs: Logprob data from the OpenAI API
+        logprobs: Logprob data from the API (can be object or dict format)
         pairwise: Whether we're doing pairwise comparison
         
     Returns:
@@ -106,6 +106,17 @@ def get_score_logprobs(judgment, patterns, logprobs, pairwise=True):
     """
     scores = {}
     continue_flag = False
+    
+    # Check that we have valid logprobs
+    has_valid_logprobs = (
+        (hasattr(logprobs, "content") and isinstance(logprobs.content, list)) or
+        (isinstance(logprobs, dict) and "content" in logprobs and isinstance(logprobs["content"], list))
+    )
+    
+    if not has_valid_logprobs:
+        print(f"WARNING: Invalid logprobs format: {type(logprobs)}")
+        if isinstance(logprobs, dict):
+            print(f"Keys: {logprobs.keys()}")
     
     # If patterns is a single pattern object (for backward compatibility)
     if not isinstance(patterns, list):
@@ -122,8 +133,8 @@ def get_score_logprobs(judgment, patterns, logprobs, pairwise=True):
             # Calculate average logprob for the matched tokens
             avg_logprob = None
             
-            # Only process if we have valid logprobs data
-            if logprobs and hasattr(logprobs, "content"):
+            # Process if we have valid logprobs data
+            if has_valid_logprobs:
                 token_logprobs = calculate_token_logprobs(judgment, match, logprobs)
                 if token_logprobs:
                     avg_logprob = sum(token_logprobs) / len(token_logprobs)
@@ -154,14 +165,15 @@ def get_score_logprobs(judgment, patterns, logprobs, pairwise=True):
             match = matches[-1].strip("\n")
             
             # Calculate average logprob for the matched tokens
-            avg_logprob = None
+            avg_logprob = None            
             
-            # Only process if we have valid logprobs data
-            if logprobs and hasattr(logprobs, "content"):
+            # Process if we have valid logprobs data
+            if has_valid_logprobs:
                 token_logprobs = calculate_token_logprobs(judgment, match, logprobs)
                 if token_logprobs:
                     avg_logprob = sum(token_logprobs) / len(token_logprobs)
-            
+                    # print(f"DEBUG - Pattern '{pattern_name}' match '{match}' logprob: {avg_logprob}")
+
             scores[pattern_name] = {
                 "match": match if pairwise else int(match),
                 "avg_logprob": avg_logprob
@@ -189,28 +201,55 @@ def calculate_token_logprobs(judgment, match, logprobs):
     
     # Find the match in the full text
     match_start = judgment.find(match)
-    if match_start >= 0:
-        match_end = match_start + len(match)
+    if match_start < 0:
+        return []
         
-        # Go through tokens and find those within our match
-        token_offset = 0
-        for i, token in enumerate(logprobs.content):
-            if hasattr(token, "text") and hasattr(token, "logprob"):
-                # Track the token offset in the original text
-                token_text = token.text
-                token_length = len(token_text)
-                
-                # Check if this token is within our match
-                token_start = token_offset
-                token_end = token_start + token_length
-                
-                # If there's overlap with our match, include this token's logprob
-                if (token_start >= match_start and token_start < match_end) or \
-                   (token_end > match_start and token_end <= match_end) or \
-                   (token_start <= match_start and token_end >= match_end):
-                    token_logprobs.append(token.logprob)
-                
-                token_offset += token_length
+    match_end = match_start + len(match)
+    
+    # Go through tokens and find those within our match
+    token_offset = 0
+    
+    # Support both object-style (OpenAI) and dict-style (Together, HF) formats
+    token_list = []
+    if hasattr(logprobs, "content") and isinstance(logprobs.content, list):
+        # OpenAI-style object with attribute
+        token_list = logprobs.content
+    elif isinstance(logprobs, dict) and "content" in logprobs and isinstance(logprobs["content"], list):
+        # Dictionary-style (Together, HF)
+        token_list = logprobs["content"]
+    else:
+        print(f"WARNING: Unrecognized logprobs format: {type(logprobs)}")
+        return []
+    
+    for i, token in enumerate(token_list):
+        # Extract text and logprob from token based on format
+        token_text = None
+        token_logprob_value = None
+        
+        # Object style: token has .text and .logprob attributes
+        if hasattr(token, "text") and hasattr(token, "logprob"):
+            token_text = token.text
+            token_logprob_value = token.logprob
+        # Dict style: token is a dict with 'text' and 'logprob' keys
+        elif isinstance(token, dict) and "text" in token and "logprob" in token:
+            token_text = token["text"]
+            token_logprob_value = token["logprob"]
+        else:
+            continue  # Skip this token if format is unknown
+        
+        token_length = len(token_text)
+        
+        # Check if this token is within our match
+        token_start = token_offset
+        token_end = token_start + token_length
+        
+        # If there's overlap with our match, include this token's logprob
+        if (token_start >= match_start and token_start < match_end) or \
+           (token_end > match_start and token_end <= match_end) or \
+           (token_start <= match_start and token_end >= match_end):
+            token_logprobs.append(token_logprob_value)
+        
+        token_offset += token_length
     
     return token_logprobs
 
@@ -362,40 +401,20 @@ def judgment(**args):
                         if return_logprobs and current_logprobs:
                             # Try to find the pattern in the text with brackets: [[A>>B]]
                             score_text = f"[[{pattern_score}]]"
-                            token_logprobs = []
                             
-                            # First extract all token information
-                            tokens_with_logprobs = []
+                            # Use the shared token_logprobs calculation function
+                            token_logprobs = calculate_token_logprobs(judgment, pattern_score, current_logprobs)
                             
-                            # Handle both dict and object formats for logprobs
-                            if isinstance(current_logprobs, dict) and "content" in current_logprobs:
-                                for token in current_logprobs["content"]:
-                                    if isinstance(token, dict) and "text" in token and "logprob" in token:
-                                        tokens_with_logprobs.append((token["text"], token["logprob"]))
-                            elif hasattr(current_logprobs, "content") and current_logprobs.content:
-                                for token in current_logprobs.content:
-                                    if hasattr(token, "text") and hasattr(token, "logprob"):
-                                        tokens_with_logprobs.append((token.text, token.logprob))
+                            # If no direct match was found, try with the full bracketed format
+                            if not token_logprobs:
+                                token_logprobs = calculate_token_logprobs(judgment, score_text, current_logprobs)
                             
-                            # Now search for tokens that match the verdict
-                            if tokens_with_logprobs:
-                                for token_text, token_prob in tokens_with_logprobs:
-                                    # Simple exact match first
-                                    if pattern_score == token_text or token_text == score_text:
-                                        token_logprobs.append(token_prob)
-                                        print(f"DEBUG: Found exact match for token '{token_text}' with logprob {token_prob}")
-                                    # Check if the token is part of the score's text
-                                    elif pattern_score in token_text or token_text in pattern_score:
-                                        token_logprobs.append(token_prob)
-                                        print(f"DEBUG: Found partial match for token '{token_text}' with logprob {token_prob}")
-                                    # Check if "[[" or "]]" are part of the token (for beginning/end markers)
-                                    elif "[[" in token_text or "]]" in token_text:
-                                        token_logprobs.append(token_prob)
-                                        print(f"DEBUG: Found bracket in token '{token_text}' with logprob {token_prob}")
-                            
+                            # If we found matching tokens, calculate the average
                             if token_logprobs:
                                 result["score_logprob"] = sum(token_logprobs) / len(token_logprobs)
                                 print(f"DEBUG: Successfully extracted score_logprob for '{pattern_score}': {result['score_logprob']}")
+                            else:
+                                print(f"DEBUG: Could not find tokens for '{pattern_score}' in the logprobs")
                 
                 # Store all pattern scores in the scores dictionary
                 if isinstance(pattern_score, dict) and "match" in pattern_score:
@@ -408,36 +427,13 @@ def judgment(**args):
                     if return_logprobs and current_logprobs and pattern_score:
                         # Create pattern_marker based on the pattern name
                         pattern_marker = f"(({pattern_score}))"
-                        token_logprobs = []
                         
-                        # First extract all token information
-                        tokens_with_logprobs = []
+                        # Try different approaches to find tokens
+                        token_logprobs = calculate_token_logprobs(judgment, pattern_score, current_logprobs)
                         
-                        # Handle both dict and object formats for logprobs
-                        if isinstance(current_logprobs, dict) and "content" in current_logprobs:
-                            for token in current_logprobs["content"]:
-                                if isinstance(token, dict) and "text" in token and "logprob" in token:
-                                    tokens_with_logprobs.append((token["text"], token["logprob"]))
-                        elif hasattr(current_logprobs, "content") and current_logprobs.content:
-                            for token in current_logprobs.content:
-                                if hasattr(token, "text") and hasattr(token, "logprob"):
-                                    tokens_with_logprobs.append((token.text, token.logprob))
-                        
-                        # Now search for tokens that match the verdict
-                        if tokens_with_logprobs:
-                            for token_text, token_prob in tokens_with_logprobs:
-                                # Simple exact match for the score itself
-                                if pattern_score == token_text:
-                                    token_logprobs.append(token_prob)
-                                # Check for exact match of the whole marker
-                                elif token_text == pattern_marker:
-                                    token_logprobs.append(token_prob)
-                                # Check if token is part of the subscore
-                                elif pattern_score in token_text or token_text in pattern_score:
-                                    token_logprobs.append(token_prob)
-                                # Check for bracket parts
-                                elif "((" in token_text or "))" in token_text:
-                                    token_logprobs.append(token_prob)
+                        # If no direct match, try with full marker
+                        if not token_logprobs:
+                            token_logprobs = calculate_token_logprobs(judgment, pattern_marker, current_logprobs)
                         
                         if token_logprobs:
                             result["scores"][pattern_name] = {

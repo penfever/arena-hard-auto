@@ -368,14 +368,14 @@ def chat_completion_huggingface(model, conv, temperature, max_tokens, return_log
                     
                     # Look for token logprobs in details
                     if "logprobs" in details:
-                        print("DEBUG - Found logprobs in details")
+                        # print("DEBUG - Found logprobs in details")
                         
                         logprobs_data = details["logprobs"]
                         if isinstance(logprobs_data, dict):
                             #print(f"DEBUG - Logprobs keys: {logprobs_data.keys()}")
                             
                             if "tokens" in logprobs_data and "token_logprobs" in logprobs_data:
-                                print("DEBUG - Found tokens and token_logprobs in logprobs")
+                                # print("DEBUG - Found tokens and token_logprobs in logprobs")
                                 token_texts = logprobs_data["tokens"]
                                 token_scores = logprobs_data["token_logprobs"]
                                 
@@ -467,13 +467,13 @@ def chat_completion_huggingface(model, conv, temperature, max_tokens, return_log
                             "logprobs": logprobs
                         }
                     else:
-                        print("DEBUG - No token scores or texts found, returning without logprobs")
+                        # print("DEBUG - No token scores or texts found, returning without logprobs")
                         return content
                 else:
-                    print("DEBUG - Missing required keys for logprobs, returning without logprobs")
+                    # print("DEBUG - Missing required keys for logprobs, returning without logprobs")
                     return content
             else:
-                print("DEBUG - First result is not a dictionary")
+                # print("DEBUG - First result is not a dictionary")
                 # Return just the generated text
                 return result[0].get("generated_text", "")
         else:
@@ -955,7 +955,8 @@ def chat_completion_together(model, messages, temperature, max_tokens, api_dict=
     
     # Add logprobs if requested
     if return_logprobs:
-        payload["logprobs"] = True
+        # Together API uses integer value 1 for logprobs
+        payload["logprobs"] = 1
     
     output = API_ERROR_OUTPUT
     for _ in range(API_MAX_RETRY):
@@ -970,6 +971,13 @@ def chat_completion_together(model, messages, temperature, max_tokens, api_dict=
             
             result = response.json()
             
+            # Print the response structure for debugging
+            if return_logprobs:
+                # print("DEBUG - Together API logprobs response structure:")
+                if "choices" in result and len(result["choices"]) > 0 and "logprobs" in result["choices"][0]:
+                    logprobs_data = result["choices"][0]["logprobs"]
+                    # print(f"Logprobs keys: {logprobs_data.keys()}")
+            
             # Extract the generated text
             if "choices" in result and len(result["choices"]) > 0:
                 content = result["choices"][0]["message"]["content"]
@@ -981,14 +989,19 @@ def chat_completion_together(model, messages, temperature, max_tokens, api_dict=
                     # Format logprobs similar to OpenAI format for compatibility
                     tokens_with_logprobs = []
                     
-                    # Extract token text and logprob values
-                    if "content" in logprobs_data and isinstance(logprobs_data["content"], list):
-                        for token_info in logprobs_data["content"]:
-                            if isinstance(token_info, dict) and "token" in token_info and "logprob" in token_info:
-                                tokens_with_logprobs.append({
-                                    "text": token_info["token"],
-                                    "logprob": token_info["logprob"]
-                                })
+                    # Together API format has parallel arrays for tokens and logprobs
+                    if ("tokens" in logprobs_data and 
+                        "token_logprobs" in logprobs_data and 
+                        len(logprobs_data["tokens"]) == len(logprobs_data["token_logprobs"])):
+                        
+                        tokens = logprobs_data["tokens"]
+                        token_logprobs = logprobs_data["token_logprobs"]
+                        
+                        for token_text, token_logprob in zip(tokens, token_logprobs):
+                            tokens_with_logprobs.append({
+                                "text": token_text,
+                                "logprob": token_logprob
+                            })
                     
                     # Return both content and logprobs
                     output = {
