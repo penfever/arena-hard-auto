@@ -154,7 +154,7 @@ def chat_completion_openai(model, messages, temperature, max_tokens, api_dict=No
     if api_dict:
         client = openai.OpenAI(
             base_url=api_dict["api_base"],
-            api_key=api_dict["api_key"],
+            api_key=api_dict.get("api_key", ""),
         )
     else:
         client = openai.OpenAI()
@@ -166,6 +166,7 @@ def chat_completion_openai(model, messages, temperature, max_tokens, api_dict=No
                 messages=messages,
                 temperature=temperature,
                 max_tokens=max_tokens,
+                timeout=60,
                 )
             output = completion.choices[0].message.content
             break
