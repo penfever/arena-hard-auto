@@ -396,7 +396,7 @@ def chat_completion_huggingface(model, conv, temperature, max_tokens, return_log
                     
                     # Extract logprobs from tokens field (present in Llama-3.1 responses)
                     if "tokens" in details:
-                        print("DEBUG - Found tokens field in details, attempting to extract logprobs")
+                        # print("DEBUG - Found tokens field in details, attempting to extract logprobs")
                         tokens_data = details["tokens"]
                         
                         if isinstance(tokens_data, list) and len(tokens_data) > 0:

@@ -349,39 +349,45 @@ def judgment(**args):
                         result["score_logprob"] = pattern_score["avg_logprob"]
                     else:
                         result["score"] = pattern_score
-                        # Need to calculate logprobs separately for non-dict scores
+                        
+                        # Calculate logprobs manually for non-dict score
                         if return_logprobs and current_logprobs:
-                            # Look for the direct score in the text
-                            score_marker = f"[[{pattern_score}]]"
+                            # Try to find the pattern in the text with brackets: [[A>>B]]
+                            score_text = f"[[{pattern_score}]]"
                             token_logprobs = []
                             
-                            # Extract tokens for the matched pattern
-                            if hasattr(current_logprobs, "content") and isinstance(current_logprobs.content, list):
-                                # Try to find tokens that form the score
-                                token_offset = 0
-                                in_score_region = False
-                                score_start = judgment.find(score_marker)
-                                
-                                if score_start >= 0:
-                                    score_end = score_start + len(score_marker)
-                                    
-                                    # Go through tokens and find those within our match
-                                    for token in current_logprobs.content:
-                                        if hasattr(token, "text") and hasattr(token, "logprob"):
-                                            token_text = token.text
-                                            token_length = len(token_text)
-                                            
-                                            # Check if this token is within our score
-                                            token_start = token_offset
-                                            token_end = token_start + token_length
-                                            
-                                            if token_start >= score_start and token_start < score_end:
-                                                token_logprobs.append(token.logprob)
-                                            
-                                            token_offset += token_length
+                            # First extract all token information
+                            tokens_with_logprobs = []
+                            
+                            # Handle both dict and object formats for logprobs
+                            if isinstance(current_logprobs, dict) and "content" in current_logprobs:
+                                for token in current_logprobs["content"]:
+                                    if isinstance(token, dict) and "text" in token and "logprob" in token:
+                                        tokens_with_logprobs.append((token["text"], token["logprob"]))
+                            elif hasattr(current_logprobs, "content") and current_logprobs.content:
+                                for token in current_logprobs.content:
+                                    if hasattr(token, "text") and hasattr(token, "logprob"):
+                                        tokens_with_logprobs.append((token.text, token.logprob))
+                            
+                            # Now search for tokens that match the verdict
+                            if tokens_with_logprobs:
+                                for token_text, token_prob in tokens_with_logprobs:
+                                    # Simple exact match first
+                                    if pattern_score == token_text or token_text == score_text:
+                                        token_logprobs.append(token_prob)
+                                        print(f"DEBUG: Found exact match for token '{token_text}' with logprob {token_prob}")
+                                    # Check if the token is part of the score's text
+                                    elif pattern_score in token_text or token_text in pattern_score:
+                                        token_logprobs.append(token_prob)
+                                        print(f"DEBUG: Found partial match for token '{token_text}' with logprob {token_prob}")
+                                    # Check if "[[" or "]]" are part of the token (for beginning/end markers)
+                                    elif "[[" in token_text or "]]" in token_text:
+                                        token_logprobs.append(token_prob)
+                                        print(f"DEBUG: Found bracket in token '{token_text}' with logprob {token_prob}")
                             
                             if token_logprobs:
                                 result["score_logprob"] = sum(token_logprobs) / len(token_logprobs)
+                                print(f"DEBUG: Successfully extracted score_logprob for '{pattern_score}': {result['score_logprob']}")
                 
                 # Store all pattern scores in the scores dictionary
                 if isinstance(pattern_score, dict) and "match" in pattern_score:
@@ -392,58 +398,44 @@ def judgment(**args):
                 else:
                     # Calculate logprobs for pattern-specific scores as well
                     if return_logprobs and current_logprobs and pattern_score:
-                        # For subscore patterns, find the exact pattern in the judgment
-                        pattern_marker = None
-                        if pattern_name == "correctness":
-                            pattern_marker = f"((cw))"  # This will be replaced below
-                        elif pattern_name == "completeness":
-                            pattern_marker = f"((cw))"  # This will be replaced below
-                        elif pattern_name == "safety":
-                            pattern_marker = f"((cw))"  # This will be replaced below
-                        elif pattern_name == "conciseness":
-                            pattern_marker = f"((cw))"  # This will be replaced below
-                        elif pattern_name == "style":
-                            pattern_marker = f"((cw))"  # This will be replaced below
-                            
-                        # Correctly format the pattern marker with the actual score
-                        if pattern_marker:
-                            pattern_marker = pattern_marker.replace("cw", str(pattern_score))
-                            
-                            # Now look for this marker in the text
-                            token_logprobs = []
-                            
-                            if hasattr(current_logprobs, "content") and isinstance(current_logprobs.content, list):
-                                token_offset = 0
-                                score_start = judgment.find(pattern_marker)
-                                
-                                if score_start >= 0:
-                                    score_end = score_start + len(pattern_marker)
-                                    
-                                    # Go through tokens and find those within our match
-                                    for token in current_logprobs.content:
-                                        if hasattr(token, "text") and hasattr(token, "logprob"):
-                                            token_text = token.text
-                                            token_length = len(token_text)
-                                            
-                                            # Check if this token is within our match
-                                            token_start = token_offset
-                                            token_end = token_start + token_length
-                                            
-                                            if token_start >= score_start and token_start < score_end:
-                                                token_logprobs.append(token.logprob)
-                                            
-                                            token_offset += token_length
-                            
-                            if token_logprobs:
-                                result["scores"][pattern_name] = {
-                                    "value": pattern_score,
-                                    "logprob": sum(token_logprobs) / len(token_logprobs)
-                                }
-                            else:
-                                result["scores"][pattern_name] = {
-                                    "value": pattern_score,
-                                    "logprob": None
-                                }
+                        # Create pattern_marker based on the pattern name
+                        pattern_marker = f"(({pattern_score}))"
+                        token_logprobs = []
+                        
+                        # First extract all token information
+                        tokens_with_logprobs = []
+                        
+                        # Handle both dict and object formats for logprobs
+                        if isinstance(current_logprobs, dict) and "content" in current_logprobs:
+                            for token in current_logprobs["content"]:
+                                if isinstance(token, dict) and "text" in token and "logprob" in token:
+                                    tokens_with_logprobs.append((token["text"], token["logprob"]))
+                        elif hasattr(current_logprobs, "content") and current_logprobs.content:
+                            for token in current_logprobs.content:
+                                if hasattr(token, "text") and hasattr(token, "logprob"):
+                                    tokens_with_logprobs.append((token.text, token.logprob))
+                        
+                        # Now search for tokens that match the verdict
+                        if tokens_with_logprobs:
+                            for token_text, token_prob in tokens_with_logprobs:
+                                # Simple exact match for the score itself
+                                if pattern_score == token_text:
+                                    token_logprobs.append(token_prob)
+                                # Check for exact match of the whole marker
+                                elif token_text == pattern_marker:
+                                    token_logprobs.append(token_prob)
+                                # Check if token is part of the subscore
+                                elif pattern_score in token_text or token_text in pattern_score:
+                                    token_logprobs.append(token_prob)
+                                # Check for bracket parts
+                                elif "((" in token_text or "))" in token_text:
+                                    token_logprobs.append(token_prob)
+                        
+                        if token_logprobs:
+                            result["scores"][pattern_name] = {
+                                "value": pattern_score,
+                                "logprob": sum(token_logprobs) / len(token_logprobs)
+                            }
                         else:
                             result["scores"][pattern_name] = {
                                 "value": pattern_score,
@@ -461,8 +453,8 @@ def judgment(**args):
         output["games"].append(result)
         
         # Add raw logprobs for this game if available
-        if return_logprobs and game_logprobs:
-            output["logprobs"].append(game_logprobs)
+        # if return_logprobs and game_logprobs:
+        #     output["logprobs"].append(game_logprobs)
 
     with open(output_file, "a") as f:
         f.write(json.dumps(output, ensure_ascii=False) + "\n")

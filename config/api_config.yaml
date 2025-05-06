@@ -83,18 +83,18 @@ Meta-Llama-3.1-405B:
 meta-llama/Llama-3.1-8B-Instruct:
     model_name: meta-llama/Llama-3.1-8B-Instruct
     endpoints: null
-    api_type: huggingface_local
-    parallel: 1
+    api_type: huggingface
+    parallel: 8
 
 Qwen/Qwen2.5-7B-Instruct:
     model_name: Qwen/Qwen2.5-7B-Instruct
-    endpoints: hull
-    api_type: huggingface_local
-    parallel: 1
+    endpoints: null
+    api_type: huggingface
+    parallel: 8
 
 Qwen/Qwen2.5-3B-Instruct:
     model_name: Qwen/Qwen2.5-3B-Instruct
-    endpoints: hull
+    endpoints: null
     api_type: huggingface_local
     parallel: 1
 
