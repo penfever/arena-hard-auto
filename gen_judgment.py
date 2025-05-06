@@ -14,6 +14,7 @@ from utils import (
     chat_completion_anthropic,
     chat_completion_huggingface,
     chat_completion_huggingface_local,
+    chat_completion_together,
     load_questions,
     load_model_answers,
     get_endpoint,
@@ -24,6 +25,7 @@ from utils import (
 def get_score(judgment, patterns, pairwise=True):
     """
     Extract scores from the judgment using multiple regex patterns.
+    Finds the last match in the string rather than the first.
     
     Args:
         judgment: The text of the judgment
@@ -45,10 +47,12 @@ def get_score(judgment, patterns, pairwise=True):
         matches = [m for m in matches if m != ""]
         if len(set(matches)) == 0:
             return None, True
-        elif len(set(matches)) == 1:
+        elif len(matches) >= 1:
+            # Get the last match instead of the first
+            last_match = matches[-1].strip("\n")
             if pairwise:
-                return matches[0].strip("\n"), False
-            return int(matches[0]), False
+                return last_match, False
+            return int(last_match), False
         else:
             return None, False
     
@@ -63,12 +67,12 @@ def get_score(judgment, patterns, pairwise=True):
         if len(set(matches)) == 0:
             # No matches for this pattern, continue requesting more tokens
             continue_flag = True
-        elif len(set(matches)) == 1:
-            # Single match for this pattern
-            match = matches[0].strip("\n")
-            scores[pattern_name] = match if pairwise else int(match)
+        elif len(matches) >= 1:
+            # Get the last match instead of checking for uniqueness
+            last_match = matches[-1].strip("\n")
+            scores[pattern_name] = last_match if pairwise else int(last_match)
         else:
-            # Multiple different matches, this is invalid for this pattern
+            # No valid matches for this pattern
             scores[pattern_name] = None
     
     # If no patterns matched anything, return None
@@ -87,7 +91,7 @@ def get_score(judgment, patterns, pairwise=True):
 def get_score_logprobs(judgment, patterns, logprobs, pairwise=True):
     """
     Similar to get_score but extracts and calculates the average logprob for each matched token
-    for multiple patterns.
+    for multiple patterns. Finds the last match in the string rather than the first.
     
     Args:
         judgment: The text of the judgment
@@ -111,8 +115,9 @@ def get_score_logprobs(judgment, patterns, logprobs, pairwise=True):
         
         if len(set(matches)) == 0:
             return None, True
-        elif len(set(matches)) == 1:
-            match = matches[0].strip("\n")
+        elif len(matches) >= 1:
+            # Get the last match instead of the first
+            match = matches[-1].strip("\n")
             
             # Calculate average logprob for the matched tokens
             avg_logprob = None
@@ -144,9 +149,9 @@ def get_score_logprobs(judgment, patterns, logprobs, pairwise=True):
         if len(set(matches)) == 0:
             # No matches for this pattern, continue requesting more tokens
             continue_flag = True
-        elif len(set(matches)) == 1:
-            # Single match for this pattern
-            match = matches[0].strip("\n")
+        elif len(matches) >= 1:
+            # Get the last match instead of checking for uniqueness
+            match = matches[-1].strip("\n")
             
             # Calculate average logprob for the matched tokens
             avg_logprob = None
@@ -162,7 +167,7 @@ def get_score_logprobs(judgment, patterns, logprobs, pairwise=True):
                 "avg_logprob": avg_logprob
             }
         else:
-            # Multiple different matches, this is invalid for this pattern
+            # No valid matches for this pattern
             scores[pattern_name] = None
     
     # If no patterns matched anything, return None
@@ -226,6 +231,9 @@ def get_answer(model, conv, temperature, max_tokens, endpoint_dict=None, return_
     elif endpoint_dict["api_type"] == "huggingface_local":
         # Local HuggingFace model with logprobs support
         output = chat_completion_huggingface_local(model, conv, temperature, max_tokens, return_logprobs)
+    elif endpoint_dict["api_type"] == "together":
+        # Together AI API supports logprobs
+        output = chat_completion_together(model, conv, temperature, max_tokens, api_dict, return_logprobs)
     else:
         # OpenAI API supports logprobs
         output = chat_completion_openai(model, conv, temperature, max_tokens, api_dict, return_logprobs)

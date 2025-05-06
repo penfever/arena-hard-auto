@@ -25,6 +25,7 @@ from utils import (
     http_completion_gemini,
     chat_completion_cohere,
     chat_completion_huggingface,
+    chat_completion_together,
     reorg_answer_file,
     OPENAI_MODEL_LIST,
     temperature_config,
@@ -81,9 +82,15 @@ def get_answer(
             elif api_type == "huggingface":
                 output = chat_completion_huggingface(model=endpoint_info["model_name"],
                                                 messages=conv,
-                                                temperature=temerature,
+                                                temperature=temperature,
                                                 max_tokens=max_tokens
                                                 )
+            elif api_type == "together":
+                output = chat_completion_together(model=endpoint_info["model_name"],
+                                                  messages=conv,
+                                                  temperature=temperature,
+                                                  max_tokens=max_tokens,
+                                                  api_dict=api_dict)
             else:
                 output = chat_completion_openai(model=endpoint_info["model_name"], 
                                                 messages=conv, 

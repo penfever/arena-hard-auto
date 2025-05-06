@@ -906,6 +906,123 @@ def chat_completion_cohere(model, messages, temperature, max_tokens):
     return output
 
 
+def chat_completion_together(model, messages, temperature, max_tokens, api_dict=None, return_logprobs=False):
+    """
+    Makes a request to Together AI's API for text generation.
+    
+    Args:
+        model: The Together AI model ID to use
+        messages: The conversation/prompt to send to the model (list of message dicts)
+        temperature: Temperature setting for generation
+        max_tokens: Maximum number of tokens to generate
+        api_dict: Dictionary containing API configuration (api_base)
+        return_logprobs: Whether to return logprobs alongside the generated text
+        
+    Returns:
+        If return_logprobs is False, returns the generated text.
+        If return_logprobs is True, returns a dict with 'content' and 'logprobs' keys.
+    """
+    import requests
+
+    # Always get API key from environment variable
+    api_key = os.environ.get("TOGETHER_API_KEY", "")
+    if not api_key:
+        print("Error: TOGETHER_API_KEY environment variable not set")
+        return API_ERROR_OUTPUT
+    
+    # Get API base URL from config if provided, otherwise use default
+    if api_dict:
+        api_base = api_dict.get("api_base", "https://api.together.xyz/v1")
+    else:
+        api_base = os.environ.get("TOGETHER_API_BASE", "https://api.together.xyz/v1")
+    
+    # Ensure the API base ends with /v1
+    if not api_base.endswith("/v1"):
+        api_base = api_base.rstrip("/") + "/v1"
+    
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    
+    # Prepare the payload for the API request
+    payload = {
+        "model": model,
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+    
+    # Add logprobs if requested
+    if return_logprobs:
+        payload["logprobs"] = True
+    
+    output = API_ERROR_OUTPUT
+    for _ in range(API_MAX_RETRY):
+        try:
+            # Send the request to the Together API
+            response = requests.post(
+                f"{api_base}/chat/completions",
+                headers=headers,
+                json=payload
+            )
+            response.raise_for_status()
+            
+            result = response.json()
+            
+            # Extract the generated text
+            if "choices" in result and len(result["choices"]) > 0:
+                content = result["choices"][0]["message"]["content"]
+                
+                # Handle logprobs if requested and available
+                if return_logprobs and "logprobs" in result["choices"][0]:
+                    logprobs_data = result["choices"][0]["logprobs"]
+                    
+                    # Format logprobs similar to OpenAI format for compatibility
+                    tokens_with_logprobs = []
+                    
+                    # Extract token text and logprob values
+                    if "content" in logprobs_data and isinstance(logprobs_data["content"], list):
+                        for token_info in logprobs_data["content"]:
+                            if isinstance(token_info, dict) and "token" in token_info and "logprob" in token_info:
+                                tokens_with_logprobs.append({
+                                    "text": token_info["token"],
+                                    "logprob": token_info["logprob"]
+                                })
+                    
+                    # Return both content and logprobs
+                    output = {
+                        "content": content,
+                        "logprobs": {"content": tokens_with_logprobs}
+                    }
+                else:
+                    # Return just the content
+                    output = content
+                
+                break
+            else:
+                print(f"Unexpected response format from Together API: {result}")
+                break
+                
+        except requests.exceptions.HTTPError as http_err:
+            print(f"HTTP error occurred: {http_err}")
+            print(f"Response: {response.text if 'response' in locals() else 'No response'}")
+            time.sleep(API_RETRY_SLEEP)
+        except requests.exceptions.RequestException as req_err:
+            print(f"Request error occurred: {req_err}")
+            time.sleep(API_RETRY_SLEEP)
+        except ValueError as json_err:
+            print(f"JSON parsing error: {json_err}")
+            print(f"Response text: {response.text if 'response' in locals() else 'No response'}")
+            break
+        except Exception as e:
+            print(f"Error in Together API call: {e}")
+            print(f"Response: {response.text if 'response' in locals() else 'No response'}")
+            break
+    
+    return output
+
+
 def reorg_answer_file(answer_file):
     """Sort by question id and de-duplication"""
     answers = {}
