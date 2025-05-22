@@ -14,6 +14,10 @@ import json
 import warnings
 warnings.filterwarnings('ignore', category=FutureWarning)
 
+# Ensure compatibility with numpy 2.0+
+if not hasattr(np, 'NAN'):
+    np.NAN = np.nan
+
 def load_processed_jsonl_files(directory_path):
     """Load JSONL files and process them for analysis."""
     import json

@@ -13,6 +13,10 @@ import argparse
 import json
 from collections import Counter
 import re
+
+# Ensure compatibility with numpy 2.0+
+if not hasattr(np, 'NAN'):
+    np.NAN = np.nan
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD, PCA
 import textwrap

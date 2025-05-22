@@ -8,6 +8,10 @@ import re
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Ensure compatibility with numpy 2.0+
+if not hasattr(np, 'NAN'):
+    np.NAN = np.nan
+
 def extract_score_column_name(filename):
     # Extract score column from filename if there's a pattern like 'factor_completeness_score'
     match = re.search(r'factor_(\w+)_score', filename)

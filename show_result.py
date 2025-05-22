@@ -15,6 +15,10 @@ from sklearn.linear_model import LogisticRegression
 from collections import defaultdict
 from utils import load_model_answers
 
+# Ensure compatibility with numpy 2.0+
+if not hasattr(np, 'NAN'):
+    np.NAN = np.nan
+
 # For Bayesian bootstrap
 try:
     import scipy.stats as stats
@@ -180,7 +184,7 @@ def predict_win_rate(elo_ratings, SCALE=400, BASE=10, INIT_RATING=1000):
             wins[b][a] = 1 - ea
 
     data = {
-        a: [wins[a][b] if a != b else np.NAN for b in names]
+        a: [wins[a][b] if a != b else np.nan for b in names]
         for a in names
     }
 

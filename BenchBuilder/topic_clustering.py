@@ -8,6 +8,10 @@ from tqdm import tqdm
 
 import numpy as np
 
+# Ensure compatibility with numpy 2.0+
+if not hasattr(np, 'NAN'):
+    np.NAN = np.nan
+
 import openai
 import tiktoken
 

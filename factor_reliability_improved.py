@@ -8,6 +8,10 @@ from pathlib import Path
 import argparse
 from tqdm import tqdm
 
+# Ensure compatibility with numpy 2.0+
+if not hasattr(np, 'NAN'):
+    np.NAN = np.nan
+
 def cronbachs_alpha(item_scores):
     """
     Calculate Cronbach's alpha for a set of item scores on a single factor.

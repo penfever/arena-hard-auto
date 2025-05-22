@@ -10,6 +10,10 @@ from factor_analyzer import FactorAnalyzer
 from factor_analyzer.factor_analyzer import calculate_bartlett_sphericity
 from factor_analyzer.factor_analyzer import calculate_kmo
 
+# Ensure compatibility with numpy 2.0+
+if not hasattr(np, 'NAN'):
+    np.NAN = np.nan
+
 def check_factor_analysis_suitability(df):
     """
     Check if the data is suitable for factor analysis using Bartlett's test and KMO.

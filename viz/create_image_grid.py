@@ -12,6 +12,10 @@ from PIL import Image
 import math
 from pathlib import Path
 
+# Ensure compatibility with numpy 2.0+
+if not hasattr(np, 'NAN'):
+    np.NAN = np.nan
+
 def create_image_grid(input_dir, output_file=None, columns=3, figsize=(16, 12), 
                      dpi=100, title=None, extensions=('.png', '.jpg', '.jpeg')):
     """
